@@ -19,8 +19,6 @@
   .app { max-width: 1280px; margin: 0 auto; background: var(--win); min-height: 100vh; border-left: 1px solid #9aa6b5; border-right: 1px solid #9aa6b5; display: flex; flex-direction: column; }
   .tbar { background: linear-gradient(#3d6aa6, #2b4f81); color: #fff; padding: 6px 10px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
   .tbar small { font-weight: 400; opacity: .8; } .tbar .sp { flex: 1; } .tbar .st { font-weight: 400; font-size: 12px; background: #ffffff22; padding: 2px 8px; border-radius: 3px; }
-  .menu { display: flex; gap: 2px; padding: 2px 6px; background: #f7f7f7; border-bottom: 1px solid var(--line2); font-size: 12px; color: #333; flex-wrap: wrap; }
-  .menu span { padding: 2px 8px; }
   .tool { display: flex; gap: 4px; padding: 6px; background: linear-gradient(#fbfbfb, #e9ecef); border-bottom: 1px solid var(--line); flex-wrap: wrap; align-items: center; }
   .tb { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-width: 70px; height: 52px; padding: 2px 8px; border: 1px solid transparent; border-radius: 3px; background: none; cursor: pointer; font-size: 12px; }
   .tb i { font-style: normal; font-size: 20px; line-height: 1.1; } .tb:hover { border-color: #8fb6e8; background: #e5f1ff; } .tb:disabled { opacity: .4; cursor: default; background: none; border-color: transparent; }
@@ -30,6 +28,7 @@
   .main { flex: 1; display: grid; grid-template-columns: 430px 1fr; gap: 6px; padding: 6px; min-height: 0; }
   @media (max-width: 980px) { .main { grid-template-columns: 1fr; } }
   .win { background: var(--pane); border: 1px solid var(--line); display: flex; flex-direction: column; min-width: 0; }
+  .win[hidden] { display: none; }
   .win > h3 { margin: 0; padding: 4px 8px; font-size: 12px; font-weight: 700; color: #fff; background: linear-gradient(#5d84ba, #46699a); display: flex; align-items: center; gap: 6px; }
   .win > h3 .sp { flex: 1; } .win > h3 button { font-size: 11px; padding: 0 6px; height: 18px; border: 1px solid #ffffff88; background: #ffffff22; color: #fff; border-radius: 2px; cursor: pointer; }
   .body { padding: 6px; overflow: auto; }
@@ -75,7 +74,6 @@
     #mRec:disabled { background: #8a8f96; }
     .app { padding-bottom: 84px; } .toast { bottom: 128px; }
     .tb { min-width: 62px; height: 48px; }
-    .menu { display: none; }
     .tbar { flex-wrap: wrap; gap: 4px 6px; font-size: 15px; } .tbar small { display: none; } .tbar .sp { flex-basis: 100%; height: 0; }
     .tbar .st { font-size: 11px; padding: 1px 6px; white-space: nowrap; }
     #ptab th:nth-child(2), #ptab td:nth-child(2) { display: none; }           /* 약칭 칸 숨김 → 이름 체크칸까지 한 화면 */
@@ -95,6 +93,14 @@
   .bk { display: inline-block; margin-left: 4px; font-size: 10px; padding: 0 4px; border-radius: 3px; background: #eef2f7; color: #5f6b7a; }
   tr.refrow td { background: #f6f0ff; } .mot { color: #8a5a00; font-size: 11px; } td.btns { white-space: nowrap; } td.btns button { margin-right: 2px; }
   .j.ref { color: #6b3fc4; }
+  #helpDlg { width: min(760px, 96vw); } #helpDlg .db { max-height: min(72vh, 900px); overflow: auto; overscroll-behavior: contain; }
+  .help .lead { margin: 0 0 8px; } .help details { border: 1px solid var(--line2); border-radius: 3px; margin: 6px 0; background: #fbfcfe; }
+  .help summary { cursor: pointer; padding: 6px 10px; font-weight: 700; color: #1d4f91; background: #eef3fa; } .help details[open] summary { border-bottom: 1px solid var(--line2); }
+  .help ul, .help ol { margin: 6px 0; padding-left: 22px; } .help li { margin: 3px 0; } .help dl { margin: 6px 10px; } .help dt { font-weight: 700; margin-top: 6px; } .help dd { margin: 2px 0 0 12px; }
+  .help .note { margin: 4px 10px 8px; } .help code { font-size: 11.5px; background: #eef2f7; padding: 0 3px; word-break: break-all; } .warnline { color: #b33; }
+  dialog[open] { display: flex; flex-direction: column; max-height: calc(100vh - 16px); max-height: calc(100dvh - 16px); } dialog .db { overflow: auto; min-height: 0; flex: 1 1 auto; } dialog h4, dialog .bt { flex: none; }
+  dialog td { white-space: normal; } #setDlg td:first-child { width: 96px; } #setDlg input[type=text] { min-width: 0; }
+  .sbtn { height: 30px; padding: 0 10px; border: 1px solid #8a99ac; background: linear-gradient(#fff, #e7eaee); border-radius: 2px; cursor: pointer; font-size: 12.5px; }
   #bLive { font-size: 11px; height: 18px; padding: 0 6px; border: 1px solid #ffffff88; background: #ffffff22; color: #fff; border-radius: 2px; cursor: pointer; }
   #bCmp { font-size: 11px; height: 18px; padding: 0 6px; border: 1px solid #ffffff88; background: #ffffff22; color: #fff; border-radius: 2px; cursor: pointer; }
   #sgClose { font-size: 11px; height: 18px; padding: 0 6px; border: 1px solid #ffffff88; background: #ffffff22; color: #fff; border-radius: 2px; cursor: pointer; }
@@ -104,13 +110,17 @@
     .tool .sep { display: none; } .tool { gap: 2px; } .tb { min-width: 58px; padding: 2px 4px; }
     #ptab th:nth-child(5), #ptab td:nth-child(5) { display: none; }
   }
+  @media (min-width: 981px) {                              /* PC: 도구 막대 한 줄 */
+    .tool { gap: 2px; padding: 5px 4px; flex-wrap: nowrap; } .tb { min-width: 56px; padding: 2px 5px; font-size: 11.5px; height: 50px; white-space: nowrap; } .tb i { font-size: 18px; }
+    .sep { margin: 0 2px; } .proj select { max-width: 130px; } .tool label { white-space: nowrap; }
+  }
+  @media (min-width: 981px) and (max-width: 1279px) { .tool { flex-wrap: wrap; } }
   @media (max-width: 980px) { .proj select { max-width: 120px; } .legend { left: 8px; font-size: 10px; } }
 </style>
 </head>
 <body>
 <div class="app">
   <div class="tbar">🔊 Servo Ear <small>— 서보 소리·진동 분석기 (MR-J4 튜닝 보조)</small><span class="sp"></span><span class="st" id="stMic">마이크: 꺼짐</span><span class="st" id="stVib">진동: 꺼짐</span><span class="st" id="stBg">배경 소음: 미측정</span><span class="st" id="stRef">기준: 없음</span><span class="st" id="stLink" hidden>🔗</span></div>
-  <div class="menu"><span>프로젝트(P)</span><span>측정(M)</span><span>파라미터(A)</span><span>결과(R)</span><span>도움말(H)</span></div>
   <div class="tool">
     <label class="proj" title="장비·축별로 결과를 나눠 보관">📁 <select id="projSel"></select><button id="projAdd" title="새 프로젝트">＋</button><button id="projRen" title="이름 바꾸기">✎</button><button id="projDel" title="프로젝트 지우기">🗑</button></label>
     <div class="sep"></div>
@@ -133,7 +143,7 @@
     <button class="tb" id="bClr" title="이 프로젝트 결과 모두 지우기"><i>🗑</i>결과 지우기</button>
     <button class="tb" id="bHelp" title="사용법"><i>❔</i>사용법</button>
     </span>
-    <input type="file" id="impFile" accept=".csv,.txt,.prm,text/*" hidden>
+    <input type="file" id="impFile" accept=".csv,.txt,.prm,.prm2,.xml,text/*" hidden>
   </div>
 
   <div class="main">
@@ -174,14 +184,14 @@
           <div class="basebar" id="baseBar"></div>
           <table class="res"><thead><tr><th title="겹쳐 보기 선택">✓</th><th>#</th><th>시각</th><th>녹음 이름</th><th>전체 (대비)</th><th>피크 주파수</th><th>피크 (대비)</th><th>판정</th><th>📳 진동 3~30Hz (대비 · Hz)</th><th>진동 판정</th><th></th></tr></thead><tbody id="rtab"></tbody></table>
           <div class="advice" id="advice"></div>
-          <div class="note">판정은 <b>⭐ 기준 운전</b>이 있으면 그 대비, 없으면 <b>🔇 정지 배경</b> 대비입니다. <span class="j ok">✅ 조용</span>(+6dB 미만) · <span class="j warn">⚠ 약간</span> · <span class="j bad">🔴 공진 의심</span>(좁은 피크 +12dB 이상) · <span class="j hunt">🟠 헌팅/저주파 의심</span>(150Hz 아래 +10dB 이상).
-          진동은 <b>3~30Hz</b>만 판정합니다 (0.5~3Hz는 축의 왕복 동작으로 보고 '왕복'으로만 표시): <span class="j ok">✅</span> 1.5배 미만 · <span class="j warn">⚠ 흔들림</span> 1.5~3배 · <span class="j hunt">🟠 헌팅 의심</span> 3배 이상이고 한 주파수가 뚜렷함.
-          마이크·휴대폰 센서로 보는 <b>보조 자료</b>입니다 — 최종 판단은 머신 애널라이저·그래프로 하세요.</div>
+          <div class="note">판정은 <b>⭐ 기준 운전</b> → 없으면 <b>◇ 자동 기준</b>(가장 낮은 응답성 측정) → <b>🔇 정지 배경</b> 대비입니다. <span class="j ok">✅ 조용</span>(+6dB 미만) · <span class="j warn">⚠ 봉우리 (공진 조짐)</span>(좁은 봉우리 +6dB~) · <span class="j bad">🔴 공진 의심</span>(150Hz 이상, +12dB 이상) · <span class="j hunt">🟠 헌팅/저주파 의심</span>(150Hz 아래 +10dB 이상).
+          진동은 <b>3~30Hz</b>만 판정합니다 (0.5~3Hz는 축의 왕복 동작): <span class="j ok">✅</span> 1.5배 미만 · <span class="j warn">⚠ 흔들림 / 덜컥·충격</span> · <span class="j hunt">🟠 헌팅 의심</span> 3배 이상이고 한 주파수가 계속됨.
+          마이크·휴대폰 센서로 보는 <b>보조 자료</b>입니다 — 최종 판단은 머신 애널라이저·그래프로 하세요. 자세한 내용은 <b>❔ 사용법</b>.</div>
         </div>
       </div>
     </div>
   </div>
-  <div class="status"><span id="sSr">샘플링: —</span><span id="sRes">분해능: —</span><span id="sDev">기기: —</span><span>녹음은 이 기기 안에만 저장</span><span>이 앱은 모터를 움직이지 않습니다 — 튜닝 운전은 장비 앞에서 직접</span></div>
+  <div class="status"><span id="sSr">샘플링: —</span><span id="sRes">분해능: —</span><span id="sDev">기기: —</span><span id="sSto">녹음은 이 기기 안에만 저장</span><span>이 앱은 모터를 움직이지 않습니다 — 튜닝 운전은 장비 앞에서 직접</span></div>
 </div>
 
 <dialog id="shareDlg"><h4>📤 결과 보내기</h4><div class="db">
@@ -200,21 +210,80 @@
     <tr><td>소리 보정 (dB)</td><td><input type="number" id="devOff" step="0.5" style="width:100px"> <span class="note">표시하는 dB에 더함 (기종별 차이 맞추기)</span></td></tr>
   </tbody></table>
   <div class="note" style="margin-top:8px">기종마다 마이크 감도가 달라 <b>절대 dB</b>는 다르게 나옵니다. 판정은 같은 기기의 <b>기준·배경 대비</b>로 하므로 보정값은 표시용입니다. 기기 이름은 결과·CSV·보고서에 같이 남습니다.</div>
+  <h5 style="margin:12px 0 4px">💾 저장 공간</h5>
+  <div id="stoInfo" class="note" style="margin-top:0">—</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><button id="sto7" class="sbtn">🧹 7일 지난 녹음 지우기</button><button id="stoAll" class="sbtn">🧹 모든 녹음(WAV) 지우기</button></div>
+  <div class="note">녹음(WAV)만 지우고 판정·스펙트럼·진동 결과는 남깁니다. 지우기 전에 📤 공유(ZIP)로 백업해 두세요.</div>
 </div><div class="bt"><button id="setNo">취소</button><button id="setOk" style="font-weight:700">저장</button></div></dialog>
 
 <dialog id="linkDlg"><h4>🔗 휴대폰 → PC 실시간 연결</h4><div class="db" id="linkBody"></div><div class="bt"><button id="linkOff">연결 끊기</button><button id="linkOk" style="font-weight:700">닫기</button></div></dialog>
 
-<dialog id="helpDlg"><h4>❔ Servo Ear 사용법</h4><div class="db">
-  <ol style="margin:0;padding-left:20px">
-    <li><b>📁 프로젝트</b>를 장비·축별로 만듭니다 (예: 1호기 X축). 결과·배경·기준·파라미터가 프로젝트마다 따로 저장됩니다.</li>
-    <li>휴대폰을 <b>기계의 고정된 부분(베드·프레임)에 테이프·자석 거치대로 단단히</b> 붙입니다. 소리는 모터·커플링·볼스크루 가까울수록 좋습니다.<br><span style="color:#b33">⚠ 움직이는 테이블·슬라이더 위에는 두지 마세요 (떨어지거나 끼일 수 있음).</span></li>
-    <li><b>📳 진동 ON → 🎙 마이크 ON</b> (아이폰은 권한 허용) → 모터를 <b>멈춘 상태</b>에서 <b>🔇 배경 측정</b> (5초).</li>
-    <li><b>낮은 응답성</b>(예: PA09=10)으로 왕복 운전하면서 <b>🚗 기준 운전</b> — 정상 구동음이 기준이 됩니다. (결과 표의 ⭐로 다른 측정을 기준으로 바꿀 수도 있음)</li>
-    <li>MR Configurator2에서 응답성 등을 바꾸고 <b>왼쪽 표에도 같은 값</b>을 넣은 뒤(📥 MRC2 불러오기도 가능) 운전 중에 <b>⏺ 측정 기록</b>.</li>
-    <li>응답성을 올려 가며 반복 → 공진이 나오면 <b>노치 필터 후보</b>를 PB13에 넣고 다시 측정 → ✓ 체크 후 <b>📈 겹쳐 보기</b>로 전·후 비교.</li>
-    <li>끝나면 <b>📄 보고서</b>(인쇄 → PDF) 또는 <b>📤 공유</b>(ZIP). PC 화면으로 바로 받으려면 <b>🔗 PC 연결</b>.</li>
-  </ol>
-  <div class="note">모터를 움직이는 조작은 반드시 장비 앞에서 안전을 확인하고 하세요. 이 앱은 소리와 진동만 봅니다.</div>
+<dialog id="helpDlg"><h4>❔ Servo Ear 사용법</h4><div class="db help">
+  <p class="lead">휴대폰 마이크·가속도 센서로 <b>응답성(PA09)을 올릴 때 공진음·헌팅이 언제부터 나는지</b> 기록하고, <b>노치 필터(PB13) 후보 주파수</b>를 알려 주는 보조 도구입니다. 서보 앰프와 통신하지 않고, 모터를 움직이지 않습니다.</p>
+  <details open><summary>① 준비</summary>
+    <ul>
+      <li><b>열기</b>: 아이폰은 Safari, 안드로이드·PC는 Chrome/Edge에서 <b>https://s95722462-cell.github.io/auto-tuning/</b> — 공유 → <b>홈 화면에 추가</b>하면 인터넷이 없어도 열립니다.</li>
+      <li><b>📁 프로젝트</b>를 장비·축별로 만듭니다 (예: 1호기 X축). 배경·기준·파라미터·결과가 프로젝트마다 따로 저장됩니다.</li>
+      <li><b>휴대폰 고정</b>: 기계의 <b>움직이지 않는 부분(베드·프레임·모터 브래킷 옆)</b>에 양면테이프·자석 거치대로 붙입니다. 모터·커플링·볼스크루에서 30cm 안쪽이 좋고, <b>측정이 끝날 때까지 같은 자리</b>에 둡니다 (전체 크기 변화는 자동으로 빼지만 자리가 바뀌면 소리 모양이 달라짐).<br><span class="warnline">⚠ 움직이는 테이블·슬라이더·케이블 베어 위에는 두지 마세요 (떨어지거나 끼일 수 있음).</span></li>
+      <li>통화·녹음 앱은 닫고, 케이스가 마이크 구멍을 막지 않게 합니다. 측정 중에는 화면이 꺼지지 않게 앱이 잡아 둡니다 (안 되는 기종은 화면 꺼짐 시간을 늘려 주세요).</li>
+    </ul>
+  </details>
+  <details open><summary>② 측정 순서 (기준 운전 → 응답성 올리기)</summary>
+    <ol>
+      <li><b>📳 진동 ON → 🎙 마이크 ON</b> (아이폰은 '동작 및 방향'·마이크 권한 허용).</li>
+      <li>모터를 <b>멈춘 상태</b>에서 <b>🔇 배경 측정</b> (5초, 진동이 켜져 있으면 손을 떼고 3초 뒤 시작).</li>
+      <li><b>낮은 응답성</b>(예: PA09=10)으로 평소 왕복 운전을 하면서 <b>🚗 기준 운전</b> — 이 '정상 구동음' 대비로 이후 측정을 판정합니다. 길이는 10초 이상, 왕복이 2번 이상 들어가게.</li>
+      <li>MR Configurator2에서 <b>PA09를 1~2단계 올리고</b>, 왼쪽 표에도 같은 값을 넣습니다 (<b>−/+</b> 버튼, 키보드 <kbd>+</kbd>/<kbd>−</kbd>, 또는 <b>📥 MRC2 불러오기</b>). 녹음 이름이 자동으로 <code>PA09=16_PB06=7.00_PB13=4500Hz</code> 처럼 붙습니다.</li>
+      <li><b>같은 운전(속도·거리·가감속)</b>을 하면서 <b>⏺ 측정 기록</b> (키보드 <kbd>R</kbd>). 4~5를 반복합니다.</li>
+      <li>공진음(삐–, 윙–)이나 헌팅(부르르)이 들리면 <b>바로 응답성을 낮추고</b> 결과를 봅니다.</li>
+    </ol>
+    <div class="note">🚗 기준 운전을 빼먹어도, 응답성이 다른 측정이 2개 이상이면 <b>가장 낮은 응답성 측정이 ◇ 자동 기준</b>이 됩니다. 결과 표의 ☆를 누르면 다른 측정을 기준으로 바꿀 수 있고, 모든 판정이 다시 계산됩니다.</div>
+  </details>
+  <details><summary>③ 결과 읽기</summary>
+    <ul>
+      <li><b>피크 (대비)</b>: 기준보다 얼마나 커진 <b>좁은 봉우리</b>인지 (dB). 휴대폰 위치가 바뀌어 전체가 커진 것, 구동음 선이 속도 차이로 조금 옮겨 간 것은 빼고 봅니다.</li>
+      <li>판정: <span class="j ok">✅ 조용</span> +6dB 미만 · <span class="j warn">⚠ 봉우리 (공진 조짐)</span> 좁은 봉우리 +6~12dB · <span class="j bad">🔴 공진 의심</span> 150Hz 이상에서 +12dB 이상 · <span class="j hunt">🟠 헌팅/저주파 의심</span> 150Hz 아래 +10dB 이상 · <span class="j warn">⚠ 120Hz 커짐 (전원 험?)</span> 50·60Hz 배수는 변압기·컴프레서일 수 있음.</li>
+      <li>진동(3~30Hz): <span class="j ok">✅</span> 기준의 1.5배 미만 · <span class="j warn">⚠ 흔들림</span> · <span class="j warn">⚠ 덜컥·충격</span> 가감속 때 짧게 튀는 것(헌팅 아님) · <span class="j hunt">🟠 헌팅 의심</span> 3배 이상이고 한 주파수가 계속됨. 0.5~3Hz는 축의 왕복 동작이라 ↔ 왕복으로만 표시합니다.</li>
+      <li><b>추천 문장</b>: "응답성 16까지는 안정, 18에서 봉우리 조짐, 20부터 공진 의심" → <b>운용은 한계보다 1~2단계 낮게</b>. 조짐은 더 높은 응답성에서 같은 주파수가 다시 나와야 한계로 칩니다.</li>
+      <li>💥 측정 중 휴대폰을 건드리거나 '쿵' 소리가 난 순간은 자동으로 빼고 계산합니다. 너무 많으면 다시 재 주세요.</li>
+      <li>✓ 체크 → <b>📈 겹쳐 보기</b>로 스펙트럼 비교, <b>🌈</b>로 시간별 소리(가감속 때만 나는지, 계속 나는지) 확인.</li>
+    </ul>
+  </details>
+  <details><summary>④ 노치 필터 순서 (MR-J4)</summary>
+    <ol>
+      <li>추천의 <b>🎯 노치 필터 후보</b> 주파수를 봅니다 (여러 측정에서 같은 주파수면 믿을 만함, 배음 2·3배는 자동으로 뺌).</li>
+      <li>MR Configurator2에서 <b>PB01(필터 튜닝 모드)을 매뉴얼 설정(_ _ _ 2)</b>으로 하고 <b>PB13(기계 공진 억제 필터 1)</b>에 후보 Hz를 넣습니다. <b>PB14(노치 형상)</b>는 처음엔 0000(깊이 −40dB · 폭 α=2) 그대로. 자동 설정(_ _ _ 1)이면 앰프가 PB13을 스스로 바꾸므로 📥로 다시 읽어 넣으세요. (설정 범위·자릿수 뜻은 기종 매뉴얼로 꼭 확인)</li>
+      <li>공진이 났던 응답성에서 <b>다시 측정</b> → 추천에 "🔁 PB13=… 적용 뒤" 비교가 나옵니다. 두 줄을 ✓ 체크하고 📈 겹쳐 보기.</li>
+      <li>효과가 약하면 PB14로 폭을 넓히거나 깊이를 바꿔 보고, 두 번째 후보가 있으면 <b>PB15·PB16</b>(필터 2)에.</li>
+      <li>노치를 넣은 뒤 응답성을 다시 조금씩 올려 <b>새 한계</b>를 확인합니다.</li>
+    </ol>
+  </details>
+  <details><summary>⑤ MR Configurator2 · PC · 보고서</summary>
+    <ul>
+      <li><b>📥 MRC2 불러오기</b>: MRC2 <b>파라미터 설정</b> 창 → <b>Save As(다른 이름으로 저장)</b> → 파일 형식 <b>CSV(*.csv)</b> 또는 <b>User Parameter Files(*.prm2)</b>로 저장한 파일을 고릅니다. 영어·일본어·한국어 화면, UTF-8·EUC-KR·Shift-JIS 모두 읽습니다 (기종 이름도 같이 표시). 'PA09=18' 처럼 적은 메모 파일도 됩니다.</li>
+      <li><b>🔗 PC 연결</b>: PC에서 누르면 QR이 나옵니다 → 휴대폰으로 찍으면 측정할 때마다 결과 숫자가 PC 화면에 바로 들어옵니다 (녹음은 휴대폰에 남음, 중계: ntfy.sh).</li>
+      <li><b>📤 공유</b>(카톡·AirDrop·Quick Share·메일, ZIP 묶기) · <b>📊 CSV</b> · <b>📄 보고서</b>(A4 → 인쇄 → PDF로 저장).</li>
+      <li><b>⚙ 설정</b>: 기기 이름·표시 보정 dB, 저장 공간 보기, 오래된 녹음(WAV) 지우기 (판정은 남음).</li>
+    </ul>
+  </details>
+  <details><summary>⑥ 한계와 안전</summary>
+    <ul>
+      <li>보조 자료입니다. 최종 판단은 <b>MRC2 머신 애널라이저(주파수 응답)·그래프</b>로 하세요. 판정 기준값은 합성한 구동음·공진·헌팅 소리로 맞춘 것이라, 실제 장비에서 머신 애널라이저 결과와 한 번 맞춰 보는 것을 권합니다.</li>
+      <li>휴대폰 마이크는 기종마다 다르고 <b>100Hz 아래는 약하게</b> 잡힙니다. 소리는 20Hz~8kHz만, 진동은 센서 속도(보통 60회/초) 때문에 <b>30Hz까지</b>만 봅니다.</li>
+      <li>기준·배경은 <b>같은 휴대폰, 같은 자리</b>에서 잰 것과 비교해야 맞습니다. 휴대폰을 바꾸면 배경·기준을 다시 재세요.</li>
+      <li><span class="warnline">⚠ 응답성을 올릴 때는 비상정지를 누를 수 있는 곳에서, 운전 범위·리밋을 확인하고, 공진음·헌팅이 나면 즉시 낮추세요. 이 앱은 모터를 멈출 수 없습니다.</span></li>
+    </ul>
+  </details>
+  <details><summary>⑦ 자주 묻는 것</summary>
+    <dl>
+      <dt>소리 값이 계속 같아요 (예: −74.7dB)</dt><dd>마이크 입력이 멈춘 것입니다 (아이폰 권한 창 뒤 등). 화면을 한 번 누르거나 🎙를 껐다 켜 주세요. 이런 측정은 '⚠ 마이크 입력 없음'으로 판정에서 빠집니다.</dd>
+      <dt>진동이 안 들어와요</dt><dd>아이폰: 설정 → Safari → '동작 및 방향 접근' 허용 후 다시 📳. PC에는 보통 센서가 없습니다.</dd>
+      <dt>모든 측정이 ⚠·🔴로 나와요</dt><dd>정지 배경과 비교 중이라 정상 구동음까지 커짐으로 보이는 것입니다. 🚗 기준 운전을 재거나 응답성을 바꿔 한 번 더 재면(자동 기준) 정확해집니다.</dd>
+      <dt>🔴인데 귀로는 잘 안 들려요</dt><dd>3kHz 넘는 소리는 작게 들릴 수 있습니다. 📈 겹쳐 보기·🌈로 확인하고, 휴대폰 자리가 바뀌지 않았는지 보세요.</dd>
+      <dt>측정이 중간에 멈췄어요</dt><dd>화면이 꺼지거나 다른 앱으로 바뀌면 휴대폰이 소리 장치를 멈추므로 그 측정은 저장하지 않습니다. 다시 재 주세요.</dd>
+      <dt>저장 공간이 부족하대요</dt><dd>⚙ 설정 → 오래된 녹음 지우기. 지우기 전에 📤 공유(ZIP)로 백업하세요.</dd>
+    </dl>
+  </details>
 </div><div class="bt"><button id="helpOk">확인</button></div></dialog>
 <div id="mBar"><div class="mi"><span id="mState">대기</span><b id="mName"></b></div><button id="mRec">⏺ 측정 기록</button></div>
 <div class="toast" id="toast"></div>
@@ -235,6 +304,7 @@ if (!PROJS) {                                             // 처음: 예전 값(
   ["bg", "vbg", "vals", "memo"].forEach(k => { const v = ls.get(k, null); if (v != null && ls.get(k + "_p1", null) == null) ls.set(k + "_p1", v); });
   ls.set("projects", PROJS);
 }
+if (!Array.isArray(PROJS) || !PROJS.length || PROJS.some(p => !p || typeof p.id !== "string")) { PROJS = (Array.isArray(PROJS) ? PROJS.filter(p => p && typeof p.id === "string") : []); if (!PROJS.length) PROJS = [{ id: "p1", name: "기본" }]; ls.set("projects", PROJS); }
 if (!PROJS.some(p => p.id === CUR)) CUR = PROJS[0].id;
 const pk = k => k + "_" + CUR;                            // 프로젝트별 저장 이름
 const projName = id => (PROJS.find(p => p.id === (id || CUR)) || PROJS[0]).name;
@@ -293,44 +363,106 @@ $("memo").oninput = () => ls.set(pk("memo"), $("memo").value);
 const guessDev = () => { const u = navigator.userAgent; const m = u.match(/;\s*(SM-[A-Z0-9]+|Pixel [^;)]+|[A-Z]{2,}-[A-Z0-9]+)\s*[;)]/); return /iPhone/.test(u) ? "iPhone" : /iPad/.test(u) ? "iPad" : m ? m[1] : /Android/.test(u) ? "Android" : /Windows/.test(u) ? "Windows PC" : /Mac/.test(u) ? "Mac" : "기기"; };
 let DEV = Object.assign({ name: guessDev(), off: 0 }, ls.get("dev", {}));
 const devLabel = () => { $("sDev").textContent = `기기: ${DEV.name}${DEV.off ? ` (보정 ${DEV.off > 0 ? "+" : ""}${DEV.off}dB)` : ""}`; };
-$("bSet").onclick = () => { $("devName").value = DEV.name; $("devOff").value = DEV.off; $("setDlg").showModal(); };
+$("bSet").onclick = () => { $("devName").value = DEV.name; $("devOff").value = DEV.off; $("setDlg").showModal(); stoInfo(); };
 $("setNo").onclick = () => $("setDlg").close();
 $("setOk").onclick = () => { DEV = { name: $("devName").value.trim() || guessDev(), off: Math.round((+$("devOff").value || 0) * 10) / 10 }; ls.set("dev", DEV); devLabel(); $("setDlg").close(); renderRes(); toast("설정을 저장했습니다"); };
 devLabel();
 
 // ================= 저장소 (IndexedDB) =================
-let dbp = null;
-const db = () => dbp || (dbp = new Promise((ok, no) => { const r = indexedDB.open("servo-ear", 1); r.onupgradeneeded = () => r.result.createObjectStore("takes", { keyPath: "id" }); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); }));
-const tx = async (mode, fn) => { const d = await db(); return new Promise((ok, no) => { const t = d.transaction("takes", mode), r = fn(t.objectStore("takes")); t.oncomplete = () => ok(r && r.result); t.onerror = () => no(t.error); }); };
-const putT = v => tx("readwrite", s => s.put(v)), delT = k => tx("readwrite", s => s.delete(k)), allAll = () => tx("readonly", s => s.getAll());
+let dbp = null, MEM = null;                               // MEM: IndexedDB 를 못 쓰는 브라우저(개인 정보 보호 창 등)에서는 메모리에만 (창을 닫으면 사라짐)
+const db = () => dbp || (dbp = new Promise((ok, no) => {
+  try { const r = indexedDB.open("servo-ear", 1); r.onupgradeneeded = () => r.result.createObjectStore("takes", { keyPath: "id" }); r.onsuccess = () => { r.result.onversionchange = () => r.result.close(); ok(r.result); }; r.onerror = () => no(r.error); r.onblocked = () => no(new Error("blocked")); setTimeout(() => no(new Error("timeout")), 6000); }
+  catch (e) { no(e); }
+}).catch(e => { MEM = new Map(); toast("⚠ 이 브라우저에서는 결과를 저장할 수 없습니다 (개인 정보 보호 창?) — 창을 닫으면 측정이 사라집니다", 7000); return null; }));
+const tx = async (mode, fn) => { const d = await db(); if (!d) return null; return new Promise((ok, no) => { const t = d.transaction("takes", mode), r = fn(t.objectStore("takes")); t.oncomplete = () => ok(r && r.result); t.onerror = () => no(t.error); t.onabort = () => no(t.error || new Error("abort")); }); };
+const putT = async v => { await db(); if (MEM) { MEM.set(v.id, v); return; } return tx("readwrite", s => s.put(v)); };
+const delT = async k => { await db(); if (MEM) { MEM.delete(k); return; } return tx("readwrite", s => s.delete(k)); };
+const putMany = async vs => { await db(); if (MEM) { vs.forEach(v => MEM.set(v.id, v)); return; } return tx("readwrite", s => { vs.forEach(v => s.put(v)); }); };
+const delMany = async ids => { await db(); if (MEM) { ids.forEach(k => MEM.delete(k)); return; } return tx("readwrite", s => { ids.forEach(k => s.delete(k)); }); };   // 한 번에 (수백 개도 빠르게)
+const allAll = async () => { await db(); if (MEM) return [...MEM.values()]; try { return (await tx("readonly", s => s.getAll())) || []; } catch (e) { toast("저장된 측정을 읽지 못했습니다: " + (e?.message || e), 5000); return []; } };
 const allT = async () => (await allAll()).filter(t => (t.proj || "p1") === CUR).sort((a, b) => a.at - b.at);   // 지금 프로젝트만
+
+// ================= 💾 저장 공간 (표시 · 오래된 녹음 정리) =================
+const MB = b => (b / 1048576).toFixed(1) + "MB";
+async function stoInfo() {
+  const all = await allAll(), w = all.filter(t => t.wav), wb = w.reduce((s, t) => s + (t.wav.size || 0), 0); let est = "";
+  try { const e = await navigator.storage?.estimate?.(); if (e?.quota) est = ` · 브라우저 사용 ${MB(e.usage || 0)} / 한도 약 ${(e.quota / 1073741824).toFixed(1)}GB`; } catch (er) {}
+  if ($("stoInfo")) $("stoInfo").innerHTML = `측정 <b>${all.length}</b>건 (프로젝트 ${PROJS.length}개) · 녹음 <b>${w.length}</b>개 ${MB(wb)}${est}${MEM ? " · <b style=\"color:#b33\">⚠ 메모리에만 저장 중</b>" : ""}`;
+  return { n: all.length, wb };
+}
+async function stoBar() {                                 // 아래 상태줄: 저장 건수·녹음 크기 · 공간이 거의 찼으면 한 번 알림
+  if (stoBar.t && Date.now() - stoBar.t < 4000) return; stoBar.t = Date.now();
+  const all = await allAll(), wb = all.reduce((s, t) => s + (t.wav?.size || 0), 0); $("sSto").textContent = MEM ? "⚠ 저장 안 됨 (메모리)" : `저장: ${all.length}건 · 녹음 ${MB(wb)} (이 기기 안에만)`;
+  try { const e = await navigator.storage?.estimate?.(); if (e?.quota && e.usage / e.quota > 0.8 && !stoBar.warned) { stoBar.warned = true; toast("⚠ 저장 공간이 거의 찼습니다 — ⚙ 설정에서 오래된 녹음을 지워 주세요", 7000); } } catch (er) {}
+}
+async function dropWav(days) {
+  if (busy) return toast("측정이 끝난 뒤에 해 주세요");
+  const lim = days ? Date.now() - days * 864e5 : Infinity, l = (await allAll()).filter(t => t.wav && t.at < lim);
+  if (!l.length) return toast(days ? `${days}일 지난 녹음이 없습니다` : "지울 녹음이 없습니다");
+  if (!confirm(`녹음(WAV) ${l.length}개 (${MB(l.reduce((s, t) => s + (t.wav.size || 0), 0))})를 지울까요?
+판정·스펙트럼·진동 결과는 그대로 남습니다. (모든 프로젝트)`)) return;
+  l.forEach(t => { t.wav = null; t.wavGone = true; }); await putMany(l);
+  stoBar.t = 0; await stoInfo(); stoBar(); renderRes(); toast(`🧹 녹음 ${l.length}개를 지웠습니다`);
+}
+$("sto7").onclick = () => dropWav(7); $("stoAll").onclick = () => dropWav(0);
 
 // ================= 스펙트럼 계산 (분해능을 받아서 — 저장된 측정도 다시 계산) =================
 const FMIN = 20, FMAX = 8000, FFT = 8192;
 const rng = (len, bh, f0, f1) => [Math.max(1, Math.round(f0 / bh)), Math.min(len - 1, Math.round(f1 / bh))];
 function bandLevel(arr, bh) { const [a, b] = rng(arr.length, bh, FMIN, FMAX); let s = 0; for (let i = a; i <= b; i++) s += 10 ** (arr[i] / 10); return 10 * Math.log10(s + 1e-20); }
+const ENV = new WeakMap();
+function envOf(ref) {                                     // 기준 스펙트럼의 '주파수 여유' 판: ±1.2% 안 최댓값 — 구동음 선이 조금 옮겨 가도(속도 차이) 새 봉우리로 안 봄
+  if (!ref) return null; let e = ENV.get(ref); if (e) return e; const n = ref.length; e = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const w = Math.round(i * 0.012); let m = -1e9; for (let k = Math.max(0, i - w); k <= Math.min(n - 1, i + w); k++) if (ref[k] > m) m = ref[k]; e[i] = m; }
+  ENV.set(ref, e); return e;
+}
+function specAvg(frames, bh) {                            // 50ms 프레임들의 파워 평균. 휴대폰 건드림·쿵 같은 '넓은 대역이 한꺼번에 커진 짧은 순간'은 빼고 (최대 30%)
+  const n = frames.length, L = frames[0].length, mu = new Float64Array(L), [a, b] = rng(L, bh, 30, FMAX);
+  for (const f of frames) for (let i = 0; i < L; i++) mu[i] += f[i] / n;
+  const hit = frames.map(f => { let c = 0; for (let i = a; i <= b; i++) if (f[i] > mu[i] + 10) c++; return c / (b - a + 1) > 0.25; });
+  const keep = new Uint8Array(n).fill(1); let bumps = 0;
+  for (let i = 0; i < n; i++) if (hit[i]) { let j = i; while (j < n && hit[j]) j++; if (j - i <= 16) { bumps++; for (let k = Math.max(0, i - 1); k < Math.min(n, j + 4); k++) keep[k] = 0; } i = j; }
+  let used = keep.reduce((s, x) => s + x, 0); if (used < n * 0.7) { keep.fill(1); used = n; bumps = 0; }
+  const acc = new Float64Array(L); let lvs = 0; frames.forEach((f, k) => { if (!keep[k]) return; for (let i = 0; i < L; i++) acc[i] += 10 ** (f[i] / 10); lvs += bandLevel(f, bh); });
+  const spec = new Float32Array(L); for (let i = 0; i < L; i++) spec[i] = 10 * Math.log10(acc[i] / used + 1e-20);
+  return { spec, bumps, used: used / n, avgLv: lvs / used };
+}
+function offOf(arr, env, bh) {                            // 대역별(약 1/5 옥타브, 최소 16칸) '전체 차이'의 중앙값 — 휴대폰 위치·거리가 바뀌어 전체가 커지거나 기운 것은 빼고 봉우리만 봄
+  const n = arr.length, off = new Float32Array(n), [a, b] = rng(n, bh, 30, FMAX), cs = [], ms = [];
+  for (let lo = a; lo <= b;) { const hi = Math.min(b, Math.max(lo + 15, Math.round(lo * 1.15))), d = []; for (let i = lo; i <= hi; i++) d.push(arr[i] - env[i]); d.sort((x, y) => x - y); cs.push((lo + hi) / 2); ms.push(d[Math.floor(d.length / 2)]); lo = hi + 1; }
+  for (let i = 0, k = 0; i < n; i++) { while (k < cs.length - 2 && cs[k + 1] < i) k++; const t = cs.length < 2 ? 0 : Math.max(0, Math.min(1, (i - cs[k]) / (cs[k + 1] - cs[k]))); off[i] = cs.length < 2 ? (ms[0] || 0) : ms[k] + (ms[k + 1] - ms[k]) * t; }
+  return off;
+}
 function peakOf(arr, ref, bh) {                           // 기준(또는 배경) 대비 가장 많이 커진 '좁은' 봉우리
-  let best = null; const [a, b] = rng(arr.length, bh, 30, FMAX), n = arr.length;
+  let best = null; const [a, b] = rng(arr.length, bh, 30, FMAX), n = arr.length; ref = envOf(ref); const off = ref ? offOf(arr, ref, bh) : null;
   for (let i = Math.max(2, a); i <= Math.min(n - 3, b); i++) {
     if (arr[i] < arr[i - 1] || arr[i] < arr[i + 1]) continue;
-    const ex = arr[i] - (ref ? ref[i] : -100);
-    const side = []; for (let k = 8; k <= 30; k++) { if (i - k > 0) side.push(arr[i - k]); if (i + k < n) side.push(arr[i + k]); }
-    side.sort((x, y) => x - y); const prom = arr[i] - side[Math.floor(side.length / 2)], score = ex + Math.min(prom, 20) * 0.3;
+    const ex = arr[i] - (ref ? ref[i] + off[i] : -100);
+    const prom = promAt(arr, i), score = ex + Math.min(prom, 20) * 0.3;
     if (!best || score > best.score) best = { i, f: i * bh, ex, prom, db: arr[i], score };
   }
   if (best) { const x = arr[best.i - 1], y = arr[best.i], z = arr[best.i + 1], d = x - 2 * y + z; if (d < 0) best.f = (best.i + 0.5 * (x - z) / d) * bh; }
   return best;
 }
-function topPeaks(arr, ref, bh, k = 3) {
-  const out = [], used = [], [a, b] = rng(arr.length, bh, 30, FMAX);
-  for (let t = 0; t < k; t++) { let best = null; for (let i = Math.max(2, a); i <= Math.min(arr.length - 3, b); i++) { if (used.some(u => Math.abs(u - i) < 6) || arr[i] < arr[i - 1] || arr[i] < arr[i + 1]) continue; const e = arr[i] - (ref ? ref[i] : -100); if (!best || e > best.e) best = { i, e }; } if (!best) break; used.push(best.i); out.push({ f: Math.round(best.i * bh), ex: Math.round(best.e * 10) / 10 }); }
+function promAt(arr, i) { const n = arr.length, side = []; for (let k = 8; k <= 30; k++) { if (i - k > 0) side.push(arr[i - k]); if (i + k < n) side.push(arr[i + k]); } side.sort((x, y) => x - y); return arr[i] - side[Math.floor(side.length / 2)]; }
+function topPeaks(arr, ref, bh, k = 3) {                  // 기준 대비 커진 봉우리 k개 (서로 2% 이상 떨어진 것) — 두 번째 노치 후보용
+  const out = [], used = [], [a, b] = rng(arr.length, bh, 30, FMAX); ref = envOf(ref); const off = ref ? offOf(arr, ref, bh) : null;
+  for (let t = 0; t < k; t++) {
+    let best = null;
+    for (let i = Math.max(2, a); i <= Math.min(arr.length - 3, b); i++) { if (used.some(u => Math.abs(u - i) < Math.max(6, u * 0.02)) || arr[i] < arr[i - 1] || arr[i] < arr[i + 1]) continue; const e = arr[i] - (ref ? ref[i] + off[i] : -100); if (!best || e > best.e) best = { i, e }; }
+    if (!best) break; used.push(best.i); const x = arr[best.i - 1], y = arr[best.i], z = arr[best.i + 1], d = x - 2 * y + z;
+    out.push({ f: Math.round((d < 0 ? best.i + 0.5 * (x - z) / d : best.i) * bh), ex: Math.round(best.e * 10) / 10, prom: Math.round(promAt(arr, best.i) * 10) / 10 });
+  }
   return out;
 }
-function judge(pk) {
-  if (!pk || pk.ex < 6) return ["ok", "✅ 조용"];
-  if (pk.f < 150 && pk.ex >= 10) return ["hunt", "🟠 헌팅/저주파 의심"];
-  if (pk.ex >= 12 && pk.prom >= 6) return ["bad", `🔴 공진 의심 ${fmtF(pk.f)}`];
-  return ["warn", "⚠ 약간"];
+const TH = { quiet: 6, hunt: 10, huntProm: 4, bad: 12, badProm: 6, pre: 6, preProm: 6 };   // 판정 기준 (dB) — 합성 시나리오로 맞춘 값
+const mainsOf = f => { for (const m of [50, 60]) { const k = Math.round(f / m); if (k >= 1 && k <= 6 && Math.abs(f - k * m) <= 2.5) return k * m; } return 0; };
+function judge(pk) {                                      // j = [분류, 글자, 세부(pre = 공진 조짐 · mains = 전원 험)]
+  if (!pk || pk.ex < TH.quiet) return ["ok", "✅ 조용"];
+  if (pk.f < 150 && pk.ex >= TH.hunt && pk.prom >= TH.huntProm) { const m = mainsOf(pk.f); return m ? ["warn", `⚠ ${m}Hz 커짐 (전원 험·설비 소음?)`, "mains"] : ["hunt", `🟠 헌팅/저주파 의심 ${Math.round(pk.f)}Hz`]; }
+  if (pk.f >= 150 && pk.ex >= TH.bad && pk.prom >= TH.badProm) return ["bad", `🔴 공진 의심 ${fmtF(pk.f)}`];
+  if (pk.f >= 150 && pk.ex >= TH.pre && pk.prom >= TH.preProm) return ["warn", `⚠ 봉우리 ${fmtF(pk.f)} (공진 조짐)`, "pre"];
+  return ["warn", pk.f < 150 ? "⚠ 저주파 약간 커짐" : "⚠ 약간 커짐"];
 }
 const fmtF = f => f >= 1000 ? (f / 1000).toFixed(2) + " kHz" : Math.round(f) + " Hz";
 const sgn = x => (x >= 0 ? "+" : "") + x.toFixed(1);
@@ -349,9 +481,19 @@ let REF = null;                                           // 기준 운전 측�
 async function loadRef() { REF = null; if (!REFID) return refLabel(); const t = (await allAll()).find(x => x.id === REFID); if (t && t.spec && !t.remote) REF = { ...t, spec: toF32(t.spec) }; refLabel(); }
 const refLabel = () => { $("stRef").textContent = REF ? `기준: ${REF.name.split("_")[0]}` : "기준: 없음"; };
 const bgLabel = () => { $("stBg").textContent = BG ? `배경: ${showDb(BG.lv)} dB · ${new Date(BG.at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}` : "배경: 미측정"; };
-function baseFor(t) {                                     // 이 측정을 무엇과 비교할지: 기준 운전(같은 분해능) → 정지 배경
-  if (REF && REF.id !== t.id && REF.binHz === t.binHz && REF.spec?.length === t.spec?.length) return { kind: "기준", spec: REF.spec, lv: REF.lv, vib: REF.vib };
-  if (BG && BG.binHz === t.binHz && BG.spec?.length === t.spec?.length) return { kind: "배경", spec: BG.spec, lv: BG.lv, vib: VBG };
+let AUTO = null;                                          // 기준 운전이 없을 때: 응답성이 가장 낮은 측정을 '자동 기준'으로 (응답성이 2가지 이상일 때)
+function pickAuto(list) {
+  AUTO = null; if (REF) return null;
+  const c = list.filter(t => !t.remote && !t.dead && !t.low && t.spec?.length && t.params?.PA09 != null && !isNaN(+t.params.PA09));
+  if (new Set(c.map(t => +t.params.PA09)).size < 2) return null;
+  const lo = c.reduce((a, b) => (+b.params.PA09 < +a.params.PA09 ? b : a));
+  if (pickAuto.c?.id !== lo.id) pickAuto.c = { ...lo, spec: toF32(lo.spec) };
+  return (AUTO = pickAuto.c);
+}
+function baseFor(t) {                                     // 이 측정을 무엇과 비교할지: 기준 운전 → 자동 기준(가장 낮은 응답성) → 정지 배경 (같은 분해능일 때)
+  const R = REF || AUTO;
+  if (R && R.id !== t.id && R.binHz === t.binHz && R.spec?.length === t.spec?.length) return { kind: REF ? "기준" : "자동 기준", spec: R.spec, lv: R.lv, vib: R.vib || VBG, vkind: R.vib ? (REF ? "기준" : "자동 기준") : "배경" };
+  if (BG && BG.binHz === t.binHz && BG.spec?.length === t.spec?.length) return { kind: "배경", spec: BG.spec, lv: BG.lv, vib: VBG, vkind: "배경" };
   return null;
 }
 const hiOf = v => (v ? (v.rmsHi ?? v.rms) : null);
@@ -361,22 +503,30 @@ function vibEval(v, base) {
   let j;
   if (ratio == null) j = hiOf(v) > 0.3 ? ["warn", "⚠ 흔들림 (비교 없음)"] : ["ok", "✅ (비교 없음)"];
   else if (ratio < 1.5) j = ["ok", "✅ 조용"];
-  else if (ratio >= 3 && (v.sharp ?? 0) >= 3) j = ["hunt", `🟠 헌팅 의심 ${v.f}Hz`];
+  else if (ratio >= 3 && (v.sharp ?? 0) >= 3 && !(v.kurt >= 4.5)) j = ["hunt", `🟠 헌팅 의심 ${v.f}Hz`];
+  else if (v.kurt >= 4.5) j = ["warn", `⚠ 덜컥·충격 ×${ratio.toFixed(1)} (가감속 때?)`];   // 짧게 튀는 진동 (지속 진동 아님)
   else j = ["warn", `⚠ 흔들림 ×${ratio.toFixed(1)}`];
   return { ratio, j };
 }
-function evalTake(t) {                                    // 저장된 측정을 지금의 기준·배경으로 다시 판정
-  if (t.remote) return t.ev;                              // 휴대폰에서 받은 결과는 휴대폰 판정 그대로
-  const base = baseFor(t), spec = t.spec, bh = t.binHz, lv = spec?.length ? bandLevel(spec, bh) : t.lv;
+const EVC = new Map();                                    // 판정 캐시 (측정 + 비교 대상이 같으면 다시 계산 안 함 — 측정이 수백 개여도 빠르게)
+function evalTake(t) {
+  const key = `${t.id}|${REF?.id || ""}|${AUTO?.id || ""}|${BG?.at || ""}|${VBG?.at || ""}|${t.remote ? 1 : 0}`, c = EVC.get(key); if (c) return c;
+  const e = evalTake0(t); if (EVC.size > 3000) EVC.clear(); EVC.set(key, e); return e;
+}
+function evalTake0(t) {                                   // 저장된 측정을 지금의 기준·배경으로 다시 판정
+  if (t.remote) return t.ev || { base: "—", lv: t.lv ?? -100, ex: null, pk: null, top: [], j: ["", "— (받은 자료 없음)"], vib: null, vibBase: "—" };   // 휴대폰에서 받은 결과는 휴대폰 판정 그대로
+  const base = baseFor(t), spec = t.spec, bh = t.binHz, lv = spec?.length ? bandLevel(spec, bh) : (t.lv ?? -100);
   let ex = base ? lv - base.lv : null, pkk = null, j, top = [];
   if (t.dead) j = ["", "⚠ 마이크 입력 없음"];
   else if (REF && REF.id === t.id) j = ["ref", "⭐ 기준"];
-  else if (!base) j = ["warn", "— (배경·기준 없음)"];
-  else { pkk = peakOf(spec, base.spec, bh); j = judge(pkk); }
+  else if (AUTO && AUTO.id === t.id) j = ["ref", "◇ 자동 기준 (가장 낮은 응답성)"];
+  else if (!base || !spec?.length) j = ["warn", "— (배경·기준 없음)"];
+  else { pkk = peakOf(spec, base.spec, bh); j = judge(pkk); if (base.kind === "배경" && j[0] === "warn" && !j[2]) j = ["warn", "⚠ 커짐 (정지 배경 대비 — 구동음일 수 있음)"]; }
   if (spec?.length && !t.dead) top = topPeaks(spec, base?.spec, bh);
   if (t.low && j[0] === "ok") j = ["warn", "⚠ 소리 작음 (마이크 멀리?)"];
-  const vbase = base ? (base.kind === "기준" ? REF.vib : VBG) : VBG, ve = vibEval(t.vib, vbase);
-  return { base: base?.kind || "—", lv, ex, pk: pkk ? { f: Math.round(pkk.f), ex: Math.round(pkk.ex * 10) / 10, prom: Math.round(pkk.prom * 10) / 10 } : null, top, j, vib: ve, vibBase: vbase ? (base?.kind === "기준" ? "기준" : "배경") : "—" };
+  const vbase = base ? base.vib : VBG, ve = vibEval(t.vib, vbase);
+  if (ve && j[0] === "ref" && ve.j[0] !== "ok" && vbase) ve.j = [ve.j[0], ve.j[1] + " (정지 배경 대비)"];   // 기준 측정 자체의 진동은 배경과 비교한 참고값
+  return { base: base?.kind || "—", lv, ex, pk: pkk ? { f: Math.round(pkk.f), ex: Math.round(pkk.ex * 10) / 10, prom: Math.round(pkk.prom * 10) / 10 } : null, top, j, vib: ve, vibBase: vbase ? (base ? base.vkind : "배경") : "—" };
 }
 
 // ================= 마이크 · 실시간 스펙트럼 =================
@@ -386,17 +536,20 @@ function wakeAudio() { try { if (ctx && ctx.state !== "running") ctx.resume().ca
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wakeAudio(); });
 async function micOn() {
   if (stream) { wakeAudio(); return true; }
+  if (!navigator.mediaDevices?.getUserMedia) { toast(window.isSecureContext === false ? "마이크는 https 주소에서만 쓸 수 있습니다 — https://s95722462-cell.github.io/auto-tuning/ 로 열어 주세요" : "이 브라우저는 마이크를 쓸 수 없습니다 — Safari(아이폰)·Chrome(안드로이드·PC)으로 열어 주세요", 6000); return false; }
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) { toast("이 브라우저는 소리 분석(Web Audio)을 지원하지 않습니다", 5000); return false; }
   try { if (navigator.audioSession) navigator.audioSession.type = "play-and-record"; } catch (e) {}
   try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } }); }
-  catch (e) { toast(e.name === "NotAllowedError" ? "마이크 사용을 허락해 주세요" : "마이크를 열지 못했습니다: " + e.message, 5000); return false; }
-  ctx = new (window.AudioContext || window.webkitAudioContext)(); ctx.onstatechange = () => { if (ctx && ctx.state !== "running") setTimeout(wakeAudio, 300); };
+  catch (e) { toast({ NotAllowedError: "마이크 사용이 막혀 있습니다 — 주소창(아이폰: 설정 → Safari → 마이크)에서 허용해 주세요", NotFoundError: "마이크를 찾지 못했습니다 (마이크가 없는 PC?)", NotReadableError: "마이크를 다른 앱이 쓰고 있습니다 (통화·녹음 앱을 닫아 주세요)", SecurityError: "보안 설정 때문에 마이크를 쓸 수 없습니다 (https 주소로 열어 주세요)" }[e.name] || "마이크를 열지 못했습니다: " + (e.message || e.name), 6000); return false; }
+  try { ctx = new AC(); } catch (e) { stream.getTracks().forEach(t => t.stop()); stream = null; toast("소리 장치를 열지 못했습니다: " + e.message, 5000); return false; }
+  ctx.onstatechange = () => { if (ctx && ctx.state !== "running") setTimeout(wakeAudio, 300); };
   if (ctx.state !== "running") await Promise.race([ctx.resume(), new Promise(r => setTimeout(r, 1500))]);
   stream.getAudioTracks().forEach(t => { t.onended = () => { toast("⚠ 마이크가 끊겼습니다 — 🎙 마이크를 껐다 다시 켜 주세요", 6000); micOff(); }; t.onmute = () => toast("⚠ 마이크 입력이 멈췄습니다 (다른 앱이 마이크를 쓰는 중일 수 있음)", 5000); });
   const src = ctx.createMediaStreamSource(stream);
   an = ctx.createAnalyser(); an.fftSize = FFT; an.smoothingTimeConstant = 0.6; an.minDecibels = -120; an.maxDecibels = 0; src.connect(an);
-  proc = ctx.createScriptProcessor(4096, 1, 1); const mute = ctx.createGain(); mute.gain.value = 0;
-  src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
-  proc.onaudioprocess = e => { if (pcmSink) pcmSink.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+  try { proc = ctx.createScriptProcessor(4096, 1, 1); const mute = ctx.createGain(); mute.gain.value = 0;   // 녹음(WAV)용 — 없는 브라우저는 녹음만 빼고 분석은 함
+    src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+    proc.onaudioprocess = e => { if (pcmSink) pcmSink.push(new Float32Array(e.inputBuffer.getChannelData(0))); }; } catch (e) { proc = null; }
   bins = an.frequencyBinCount; binHz = ctx.sampleRate / FFT; fbuf = new Float32Array(bins); makeBands();
   if (BG && BG.binHz !== binHz) toast("이 기기의 마이크 분해능이 배경 측정 때와 달라 배경을 다시 재 주세요", 4000);
   $("stMic").textContent = "마이크: 켜짐"; $("bMic").innerHTML = "<i>🎙</i>마이크 OFF"; $("bMic").classList.add("on");
@@ -426,7 +579,7 @@ function line(arr, bh, color, w, c = g, W = cv.width, H = cv.height, dash) {
   c.stroke(); c.setLineDash([]);
 }
 let alarmCnt = 0, micDead = false, frozenView = false;   // frozenView: 겹쳐 보기 중이면 실시간 그리기 멈춤
-const liveBase = () => (REF && REF.binHz === binHz && REF.spec.length === bins ? { kind: "기준", spec: REF.spec, lv: REF.lv } : BG && BG.binHz === binHz && BG.spec.length === bins ? { kind: "배경", spec: BG.spec, lv: BG.lv } : null);
+const liveBase = () => (REF && REF.binHz === binHz && REF.spec.length === bins ? { kind: "기준", spec: REF.spec, lv: REF.lv } : AUTO && AUTO.binHz === binHz && AUTO.spec.length === bins ? { kind: "자동 기준", spec: AUTO.spec, lv: AUTO.lv } : BG && BG.binHz === binHz && BG.spec.length === bins ? { kind: "배경", spec: BG.spec, lv: BG.lv } : null);
 function draw() {
   if (!an) { if (!frozenView) grid(); return; }
   an.getFloatFrequencyData(fbuf);
@@ -510,19 +663,31 @@ function lowpass2(x, fs, fc) {                           // 4차 버터워스 �
 }
 function vibAnalyze(smp) {                                // 3축 진동: 전체 RMS, 3~30Hz 띠 RMS·뚜렷한 주파수, 0.5~3Hz 왕복 동작
   if (!smp || smp.length < 20) return null;
-  const T0 = smp[0][0], dur = (smp[smp.length - 1][0] - T0) / 1000, fs = (smp.length - 1) / dur;
+  const T0 = smp[0][0], dur = (smp[smp.length - 1][0] - T0) / 1000, fs = (smp.length - 1) / dur; if (!(dur > 0.3) || !isFinite(fs)) return null;
   const ax = [1, 2, 3].map(k => { const m = smp.reduce((s, r) => s + r[k], 0) / smp.length; return smp.map(r => r[k] - m); });
   const rms = Math.sqrt(smp.reduce((s, _, i) => s + ax[0][i] ** 2 + ax[1][i] ** 2 + ax[2][i] ** 2, 0) / smp.length);
   const axHi = ax.map(a => { const l = lowpass2(a, fs, 2); return a.map((v, i) => v - l[i]); });   // 3~30Hz 판정용 (왕복 동작을 뺀 것)
-  const N = smp.length, ts = smp.map(r => (r[0] - T0) / 1000), fmax = Math.min(30, fs / 2 - 0.5), df = Math.max(0.1, 1 / dur / 2), lo = [], hi = [];
+  const N = smp.length, ts = smp.map(r => (r[0] - T0) / 1000), fmax = Math.min(30, fs / 2 - 0.5), df = Math.max(0.1, 1 / dur / 2), lo = [], hi = [], e3 = i => axHi[0][i] ** 2 + axHi[1][i] ** 2 + axHi[2][i] ** 2;
+  // 0.25초 창마다 세기: 손으로 건드림·쿵 같이 짧고 아주 큰 창(중앙값의 4배 넘는 RMS)은 빼고 계산 (전체의 30%까지)
+  const wn = Math.max(4, Math.round(fs * 0.25)), wins = []; for (let s = 0; s + wn <= N; s += wn) { let e = 0; for (let i = s; i < s + wn; i++) e += e3(i); wins.push([s, e / wn]); }
+  const wmed = wins.map(w => w[1]).sort((p, q) => p - q)[Math.floor(wins.length / 2)] || 0;
+  let big = wins.filter(w => w[1] > 16 * wmed && w[1] > 0.01); if (big.length > wins.length * 0.3) big = [];
+  const skip = new Uint8Array(N); big.forEach(([s]) => skip.fill(1, s, s + wn));
+  const nk = Math.max(1, N - big.length * wn), zx = big.length ? ax.map(a => a.map((v, i) => (skip[i] ? 0 : v))) : ax, zh = big.length ? axHi.map(a => a.map((v, i) => (skip[i] ? 0 : v))) : axHi;
   for (let f = 0.5; f <= fmax; f += df) {
-    let pw = 0; for (const a of (f < 3 ? ax : axHi)) { let re = 0, im = 0; for (let i = 0; i < N; i++) { const w = 2 * Math.PI * f * ts[i]; re += a[i] * Math.cos(w); im -= a[i] * Math.sin(w); } pw += re * re + im * im; }
-    (f < 3 ? lo : hi).push([f, Math.sqrt(pw) * 2 / N]);
+    let pw = 0; for (const a of (f < 3 ? zx : zh)) { let re = 0, im = 0; for (let i = 0; i < N; i++) { const w = 2 * Math.PI * f * ts[i]; re += a[i] * Math.cos(w); im -= a[i] * Math.sin(w); } pw += re * re + im * im; }
+    (f < 3 ? lo : hi).push([f, Math.sqrt(pw) * 2 / nk]);
   }
   const bestOf = s => s.reduce((b, x) => (x[1] > b[1] ? x : b), [0, 0]), bh = bestOf(hi), bl = bestOf(lo);
-  const mean = hi.reduce((s, x) => s + x[1], 0) / (hi.length || 1), rmsHi = Math.sqrt(smp.reduce((s, _, i) => s + axHi[0][i] ** 2 + axHi[1][i] ** 2 + axHi[2][i] ** 2, 0) / N);   // 3~30Hz 진동 RMS
+  const mean = hi.reduce((s, x) => s + x[1], 0) / (hi.length || 1);
+  let es = 0, ns = 0; for (let i = 0; i < N; i++) if (!skip[i]) { es += e3(i); ns++; }
+  const rmsHi = Math.sqrt(es / Math.max(1, ns));          // 3~30Hz 진동 RMS
+  const en = zh.map(a => a.reduce((s, v) => s + v * v, 0)), dom = en.indexOf(Math.max(...en));
+  let m2 = 0, m4 = 0; for (let i = 0; i < N; i++) if (!skip[i]) { const v = axHi[dom][i] ** 2; m2 += v; m4 += v * v; }
+  const kurt = ns ? (m4 / ns) / ((m2 / ns) ** 2 || 1e-12) : 0;   // 뾰족함: 지속 진동(사인) ≈ 1.5, 덜컥·충격처럼 짧게 튀면 5 이상
+  const bs = new Set(big.map(w => w[0])); let shocks = 0; wins.forEach((w, k) => { if (bs.has(w[0]) && !(k && bs.has(wins[k - 1][0]))) shocks++; });
   const r4 = x => Math.round(x * 10000) / 10000;
-  return { rms: r4(rms), rmsHi: r4(rmsHi), f: Math.round(bh[0] * 10) / 10, amp: r4(bh[1]), sharp: Math.round(bh[1] / (mean || 1e-9) * 10) / 10, mf: Math.round(bl[0] * 10) / 10, mamp: r4(bl[1]), fs: Math.round(fs) };
+  return { rms: r4(rms), rmsHi: r4(rmsHi), f: Math.round(bh[0] * 10) / 10, amp: r4(bh[1]), sharp: Math.round(bh[1] / (mean || 1e-9) * 10) / 10, mf: Math.round(bl[0] * 10) / 10, mamp: r4(bl[1]), fs: Math.round(fs), kurt: Math.round(kurt * 10) / 10, shocks };
 }
 const vcv = $("vcv"), vg = vcv.getContext("2d");
 function vdraw() {
@@ -549,17 +714,18 @@ function vdraw() {
 function measure(sec, onTick) {                           // sec 초 동안: 파워 평균 스펙트럼 + 스펙트로그램 + PCM + 진동
   return new Promise(res => {
     wakeAudio();
-    const acc = new Float64Array(bins), t0 = performance.now(), sg = []; let n = 0, changes = 0, lastH = null, lvSum = 0, tick = 0; pcmSink = []; vSink = vibOn ? [] : null;
+    const frames = [], t0 = performance.now(), sg = []; let n = 0, changes = 0, lastH = null, tick = 0; pcmSink = []; vSink = vibOn ? [] : null;
     const iv = setInterval(() => {
-      an.getFloatFrequencyData(fbuf); for (let i = 0; i < bins; i++) acc[i] += 10 ** (fbuf[i] / 10); n++; lvSum += bandLevel(fbuf, binHz);
+      if (!an || document.hidden) { clearInterval(iv); pcmSink = vSink = null; measure.why = an ? "화면이 꺼지거나 다른 앱으로 바뀌어 측정을 멈췄습니다" : "측정 중에 마이크가 꺼졌습니다"; res(null); return; }   // 마이크 꺼짐 · 화면 꺼짐(휴대폰은 소리 장치가 멈춤)
+      an.getFloatFrequencyData(fbuf); frames.push(Float32Array.from(fbuf)); n++;
       let h = 0; for (let i = 1; i < bins; i += 7) h = (h * 31 + Math.round(fbuf[i] * 10)) | 0; if (lastH !== null && h !== lastH) changes++; lastH = h;
       if (tick++ % 2 === 0) sg.push(sgFrame(fbuf));
       const el = (performance.now() - t0) / 1000; onTick && onTick(Math.min(1, el / sec), sec - el);
       if (el >= sec) {
-        clearInterval(iv); const spec = new Float32Array(bins); for (let i = 0; i < bins; i++) spec[i] = 10 * Math.log10(acc[i] / n + 1e-20);
+        clearInterval(iv); const av = specAvg(frames, binHz), spec = av.spec; frames.length = 0;
         let pcm = pcmSink; pcmSink = null; const want = Math.round(sec * ctx.sampleRate); let have = pcm.reduce((t, c) => t + c.length, 0); while (pcm.length > 1 && have - pcm[0].length >= want) { have -= pcm[0].length; pcm.shift(); }   // 녹음 길이는 정한 초만큼
         const vib = vSink; vSink = null;
-        res({ spec, pcm, vib, sg: { dt: sec / Math.max(1, sg.length), d: sg }, dead: changes < Math.max(3, n * 0.05), avgLv: lvSum / Math.max(1, n) });
+        res({ spec, pcm, vib, sg: { dt: sec / Math.max(1, sg.length), d: sg }, dead: changes < Math.max(3, n * 0.05), avgLv: av.avgLv, bumps: av.bumps });
       }
     }, 50);
   });
@@ -568,13 +734,17 @@ let busy = false;
 const prog = (p, left, label) => { $("recProg").style.width = Math.round(p * 100) + "%"; $("recLeft").textContent = left > 0 ? Math.ceil(left) + "초" : ""; if (label) $("recState").textContent = label;
   $("mState").textContent = $("recState").textContent; $("mRec").textContent = busy && left > 0 ? `⏺ ${Math.ceil(left)}초` : "⏺ 측정 기록"; $("mRec").disabled = busy && left > 0; };
 $("mRec").onclick = () => $("bRec").click();
+let WL = null;                                            // 측정 중 화면 꺼짐 막기 (지원하는 브라우저만)
+const wlOn = async () => { try { WL = await navigator.wakeLock?.request("screen"); } catch (e) { WL = null; } }, wlOff = () => { try { WL?.release(); } catch (e) {} WL = null; };
 const countdown = async () => { if (!vibOn) return; for (let k = 3; k > 0; k--) { prog(0, 0, `손을 떼 주세요… ${k}`); await new Promise(r => setTimeout(r, 1000)); } };
 $("bBg").onclick = async () => {
   if (busy) return; if (!(await micOn())) return;
   if (!confirm(`모터를 멈춘 상태인가요?\n\n지금부터 5초 동안 주변 소음(팬·다른 설비)${vibOn ? "과 바닥 진동" : ""}을 잽니다.${vibOn ? "\n\n📳 휴대폰을 기계에 고정하고 손을 뗀 상태에서 확인을 누르세요 (3초 뒤 시작)." : ""}`)) return;
-  busy = true; await countdown(); prog(0, 5, `🔇 배경 ${vibOn ? "소음·진동" : "소음"} 측정 중…`);
+  busy = true; await countdown(); wlOn(); prog(0, 5, `🔇 배경 ${vibOn ? "소음·진동" : "소음"} 측정 중…`);
   const r = await measure(5, (p, l) => prog(p, l));
-  if (r.vib && r.vib.length > 20) { const v = vibAnalyze(r.vib); VBG = { rms: v.rms, rmsHi: v.rmsHi, f: v.f, at: Date.now() }; ls.set(pk("vbg"), VBG); vibLabel(); }
+  wlOff();
+  if (!r) { busy = false; prog(0, 0, `⚠ ${measure.why} — 배경을 저장하지 않았습니다`); toast(`⚠ ${measure.why}`, 4000); return; }
+  if (r.vib && r.vib.length > 20) { const v = vibAnalyze(r.vib); if (v) { VBG = { rms: v.rms, rmsHi: v.rmsHi, f: v.f, at: Date.now() }; ls.set(pk("vbg"), VBG); vibLabel(); } }
   if (r.dead) { busy = false; prog(0, 0, "⚠ 마이크 입력 없음 — 배경 소음을 저장하지 않았습니다"); toast("⚠ 마이크 소리가 들어오지 않습니다. 화면을 한 번 누르거나 🎙 마이크를 껐다 켠 뒤 다시 재 주세요", 6000); return; }
   BG = { spec: Float32Array.from([...r.spec].map(x => Math.round(x * 10) / 10)), lv: bandLevel(r.spec, binHz), binHz, at: Date.now() };
   ls.set(pk("bg"), { ...BG, spec: [...BG.spec] }); busy = false; prog(1, 0, "배경 소음 저장됨"); bgLabel(); renderRes();
@@ -592,20 +762,30 @@ async function record(asRef) {
   if (busy) return; if (!(await micOn())) return;
   if (asRef && !confirm(`🚗 기준 운전을 잽니다.\n\n낮은 응답성(예: PA09=10)으로 평소처럼 왕복 운전하는 중에 확인을 누르세요.\n이 측정이 '정상 구동음' 기준이 되어, 이후 측정은 이 기준 대비로 판정합니다.\n\n지금 이름: ${recName()}`)) return;
   if (!asRef && !BG && !REF && !confirm("배경 소음·기준 운전을 아직 재지 않았습니다. 그래도 기록할까요?\n(먼저 재면 판정이 정확해집니다)")) return;
-  const sec = +$("recLen").value, name = recName(), params = { ...V }, named = [...NAMED];
-  busy = true; $("bRec").disabled = $("bRef").disabled = true; prog(0, sec, `${asRef ? "🚗 기준 운전" : "⏺ 기록"} 중: ${name}`);
+  const sec = +$("recLen").value, name = recName(), params = { ...V }, named = [...NAMED], SR = ctx.sampleRate;
+  busy = true; $("bRec").disabled = $("bRef").disabled = true; prog(0, sec, `${asRef ? "🚗 기준 운전" : "⏺ 기록"} 중: ${name}`); wlOn();
+  try { await recordBody(asRef, sec, name, params, named, SR); }
+  catch (e) { prog(0, 0, "⚠ 측정을 저장하지 못했습니다"); toast("⚠ 측정을 저장하지 못했습니다: " + (e?.message || e), 6000); }
+  finally { busy = false; wlOff(); $("bRec").disabled = $("bRef").disabled = false; }
+}
+async function recordBody(asRef, sec, name, params, named, SR) {
   const r = await measure(sec, (p, l) => prog(p, l));
+  if (!r) { prog(0, 0, `⚠ ${measure.why} — 저장하지 않았습니다`); toast(`⚠ ${measure.why} — 다시 재 주세요`, 4500); return; }
   const lv = bandLevel(r.spec, binHz), v = vibAnalyze(r.vib);
   if (v) v.raw = r.vib.map(q => [Math.round(q[0] - r.vib[0][0]), +q[1].toFixed(4), +q[2].toFixed(4), +q[3].toFixed(4)]);
   const take = { id: "t" + Date.now(), at: Date.now(), proj: CUR, name, params, named, memo: $("memo").value, sec, lv: Math.round(lv * 10) / 10, avgLv: Math.round(r.avgLv * 10) / 10,
-    spec: [...r.spec].map(x => Math.round(x * 10) / 10), sr: ctx.sampleRate, binHz, wav: toWav(r.pcm, ctx.sampleRate), sg: r.sg, vib: v, dead: r.dead, low: r.avgLv < -90, dev: { ...DEV }, isRef: !!asRef };
-  await putT(take);
+    spec: [...r.spec].map(x => Math.round(x * 10) / 10), sr: SR, binHz, wav: r.pcm.length ? toWav(r.pcm, SR) : null, sg: r.sg, vib: v, dead: r.dead, low: r.avgLv < -90, bumps: r.bumps || 0, dev: { ...DEV }, isRef: !!asRef };
+  try { await putT(take); }
+  catch (e) {                                             // 저장 공간 부족: 녹음(WAV)·진동 원본 없이 다시
+    if (!/quota|space|full/i.test((e?.name || "") + (e?.message || ""))) throw e;
+    take.wav = null; if (take.vib) delete take.vib.raw; take.noWav = true; await putT(take);
+    toast("⚠ 저장 공간이 부족해 이번 측정은 녹음(WAV) 없이 저장했습니다 — ⚙ 설정에서 오래된 녹음을 지워 주세요", 7000);
+  }
   if (asRef && !r.dead) { REFID = take.id; ls.set(pk("ref"), REFID); await loadRef(); }
-  busy = false; $("bRec").disabled = $("bRef").disabled = false;
-  const ev = evalTake(take);
+  const all = await allT(); pickAuto(all); const ev = evalTake(take);
   prog(1, 0, `저장: ${name} → ${ev.j[1]}${ev.vib ? ` · 진동 ${ev.vib.j[1]}` : ""}`);
   toast(r.dead ? "⚠ 이번 측정은 마이크 소리가 들어오지 않았습니다 — 소리 판정은 빼고 진동만 봅니다" : asRef ? `🚗 기준 운전 저장 — 이제 응답성을 올려 가며 ⏺ 측정 기록` : `📝 ${name} — ${ev.j[1]}${ev.vib ? ` · 📳 ${ev.vib.j[1]}` : ""}`, r.dead ? 6000 : 3000);
-  renderRes(); linkSend(take, ev);
+  renderRes(); linkSend(take, ev); try { if (!ls.get("persist", false)) { ls.set("persist", true); navigator.storage?.persist?.(); } } catch (e) {}   // 브라우저가 공간 부족 때 지우지 않게 요청
 }
 $("bRec").onclick = () => record(false);
 $("bRef").onclick = () => record(true);
@@ -614,16 +794,16 @@ $("bRef").onclick = () => record(true);
 let playing = null, LAST = [];
 const cmpSel = new Set();
 async function renderRes() {
-  const list = await allT(), tb = $("rtab"); tb.innerHTML = ""; LAST = list.map(t => ({ t, e: evalTake(t) }));
+  const list = await allT(), tb = $("rtab"); tb.innerHTML = ""; pickAuto(list); LAST = list.map(t => ({ t, e: evalTake(t) }));
   $("resProj").textContent = `— 📁 ${projName()}`; $("resCount").textContent = list.length ? ` ${list.length}건` : "";
-  $("baseBar").innerHTML = REF ? `비교 기준: <b>⭐ 기준 운전</b> ${esc(REF.name)} (${new Date(REF.at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}) <button id="refClr">기준 해제</button>` : BG ? "비교 기준: <b>🔇 정지 배경</b> — 낮은 응답성으로 <b>🚗 기준 운전</b>을 재면 정상 구동음을 빼고 볼 수 있습니다" : "비교 기준 없음 — 🔇 배경 측정, 🚗 기준 운전을 먼저 해 주세요";
+  $("baseBar").innerHTML = REF ? `비교 기준: <b>⭐ 기준 운전</b> ${esc(REF.name)} (${new Date(REF.at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}) <button id="refClr">기준 해제</button>` : AUTO ? `비교 기준: <b>◇ 자동 기준</b> — 응답성이 가장 낮은 측정 ${esc(AUTO.name)} (🚗 기준 운전을 재거나 ☆로 바꿀 수 있음)` : BG ? "비교 기준: <b>🔇 정지 배경</b> — 낮은 응답성으로 <b>🚗 기준 운전</b>을 재면 정상 구동음을 빼고 볼 수 있습니다" : "비교 기준 없음 — 🔇 배경 측정, 🚗 기준 운전을 먼저 해 주세요";
   if ($("refClr")) $("refClr").onclick = async () => { REFID = null; ls.set(pk("ref"), null); await loadRef(); renderRes(); toast("기준 운전을 해제했습니다 — 정지 배경 대비로 판정합니다"); };
   LAST.forEach(({ t, e }, k) => {
     const tr = document.createElement("tr"), d = new Date(t.at), vb = t.vib, ve = e.vib;
-    if (REF && REF.id === t.id) tr.className = "refrow";
-    tr.innerHTML = `<td class="c"><input type="checkbox" class="cmp" ${cmpSel.has(t.id) ? "checked" : ""} ${t.remote ? "disabled" : ""}></td><td>${k + 1}</td><td>${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}</td><td style="font-family:Consolas,monospace;color:#1d4f91" title="${esc(t.memo || "")}${t.dev ? " · " + esc(t.dev.name) : ""}">${t.remote ? "📱 " : ""}${t.isRef ? "🚗 " : ""}${esc(t.name)}</td>
+    if ((REF && REF.id === t.id) || (AUTO && AUTO.id === t.id)) tr.className = "refrow";
+    tr.innerHTML = `<td class="c"><input type="checkbox" class="cmp" ${cmpSel.has(t.id) ? "checked" : ""} ${t.remote ? "disabled" : ""}></td><td>${k + 1}</td><td>${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}</td><td style="font-family:Consolas,monospace;color:#1d4f91" title="${esc(t.memo || "")}${t.dev ? " · " + esc(t.dev.name) : ""}">${t.remote ? "📱 " : ""}${t.isRef ? "🚗 " : ""}${esc(t.name)}${t.bumps ? `<span class="bk" title="휴대폰 건드림·쿵 소리 ${t.bumps}번 — 그 순간은 빼고 계산">💥${t.bumps}</span>` : ""}${t.noWav || t.wavGone ? '<span class="bk" title="녹음 없음 (정리했거나 공간 부족)">녹음 없음</span>' : ""}</td>
       <td>${showDb(e.lv)} dB${e.ex != null ? ` (${sgn(e.ex)})` : ""}${e.base !== "—" ? `<span class="bk">${e.base}</span>` : ""}</td><td>${e.pk ? fmtF(e.pk.f) : "—"}</td><td>${e.pk ? sgn(e.pk.ex) + " dB" : "—"}</td><td class="j ${e.j[0]}">${e.j[1]}</td>
-      <td class="vibc">${vb ? `<b>${hiOf(vb).toFixed(3)}</b> m/s²${ve?.ratio != null ? ` (×${ve.ratio})` : ""} · ${vb.f}Hz${vb.mamp > 0.05 ? `<br><span class="mot">↔ 왕복 ${vb.mf}Hz</span>` : ""}` : "—"}</td><td class="j ${ve ? ve.j[0] : ""}">${ve ? ve.j[1] : "—"}</td>
+      <td class="vibc">${vb ? `<b>${hiOf(vb).toFixed(3)}</b> m/s²${ve?.ratio != null ? ` (×${ve.ratio})` : ""} · ${vb.f}Hz${vb.mamp > 0.05 ? `<br><span class="mot">↔ 왕복 ${vb.mf}Hz</span>` : ""}${vb.shocks ? `<br><span class="mot">✋ 손 닿음 ${vb.shocks}번 뺌</span>` : ""}` : "—"}</td><td class="j ${ve ? ve.j[0] : ""}">${ve ? ve.j[1] : "—"}</td>
       <td class="btns">${t.wav ? '<button class="p" title="듣기">▶</button>' : ""}${t.spec ? '<button class="s" title="스펙트럼">📈</button>' : ""}${t.sg ? '<button class="g" title="스펙트로그램">🌈</button>' : ""}${t.spec && !t.dead && !t.remote ? `<button class="r" title="이 측정을 비교 기준으로">${REF && REF.id === t.id ? "⭐" : "☆"}</button>` : ""}${t.wav ? '<button class="w" title="WAV 내려받기">⬇</button>' : ""}${vb?.raw ? '<button class="v" title="진동 원본 CSV">📳</button>' : ""}<button class="x" title="지우기">✕</button></td>`;
     const q = c => tr.querySelector(c), fn = `${safe(t.name)}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
     q(".cmp").onchange = e2 => { e2.target.checked ? cmpSel.add(t.id) : cmpSel.delete(t.id); $("bCmp").textContent = `📈 겹쳐 보기${cmpSel.size ? ` (${cmpSel.size})` : ""}`; };
@@ -638,31 +818,51 @@ async function renderRes() {
   });
   if (!list.length) tb.innerHTML = '<tr><td colspan="11" style="color:var(--dim);padding:10px">아직 측정이 없습니다. 🎙 마이크 ON → 🔇 배경 측정 → 🚗 기준 운전 → 응답성을 바꿔 가며 ⏺ 측정 기록</td></tr>';
   $("bCmp").textContent = `📈 겹쳐 보기${cmpSel.size ? ` (${cmpSel.size})` : ""}`;
-  $("advice").innerHTML = advise(LAST);
+  $("advice").innerHTML = advise(LAST); stoBar();
 }
 function advise(L) {                                      // 응답성(PA09)별 어디까지 괜찮았는지 · 노치 후보 · 진동
-  const items = L.filter(x => !(REF && REF.id === x.t.id) && !x.t.isRef);
+  const isBase = x => (REF && REF.id === x.t.id) || (AUTO && AUTO.id === x.t.id);
+  const items = L.filter(x => !isBase(x) && !x.t.isRef);
   if (!items.length) return L.length ? "🚗 기준 운전을 저장했습니다. 이제 응답성을 올려 가며 ⏺ 측정 기록을 해 보세요." : "";
-  const out = [], byR = items.filter(x => x.t.params?.PA09).map(x => ({ r: +x.t.params.PA09, ...x })).sort((a, b) => a.r - b.r);
+  const out = [], byR = items.filter(x => x.t.params?.PA09 != null && !isNaN(+x.t.params.PA09)).map(x => ({ r: +x.t.params.PA09, ...x })).sort((a, b) => a.r - b.r || a.t.at - b.t.at);
   const badOf = x => (x.e.j[0] === "bad" || x.e.j[0] === "hunt" ? x.e.j[1] : "") || (x.e.vib && x.e.vib.j[0] === "hunt" ? "📳 " + x.e.vib.j[1] : "");
-  const firstBad = byR.find(badOf), okBefore = byR.filter(x => !badOf(x) && !x.t.dead && (!firstBad || x.r < firstBad.r));
-  const refR = REF?.params?.PA09 ? +REF.params.PA09 : null;
-  if (okBefore.length) out.push(`✅ <b>응답성(PA09) ${okBefore[okBefore.length - 1].r}까지는 안정</b>${firstBad ? `, <b>${firstBad.r}</b>부터 ${badOf(firstBad)}` : " (공진·헌팅 없음)"}`);
-  else if (firstBad && refR != null && refR < firstBad.r) out.push(`✅ 기준(PA09=${refR})은 정상, <b>${firstBad.r}</b>부터 ${badOf(firstBad)} — 그 사이 값(예: ${Math.round((refR + firstBad.r) / 2)})도 측정해 보세요.`);
-  else if (firstBad) out.push(`🔴 가장 낮은 응답성 ${firstBad.r}에서도 ${badOf(firstBad)} — 응답성을 더 낮추거나 기계 쪽(체결·풀림)도 확인해 보세요.`);
+  const near = (a, b) => a && b && Math.abs(a.f - b.f) / b.f < 0.05;
+  const preOf = x => {                                    // 조짐: 더 높은 응답성에서 같은 주파수가 다시 보이거나(커짐) 가장 높은 측정일 때만 한계로 침
+    if (badOf(x) || x.e.j[2] !== "pre") return ""; const hi = byR.filter(y => y.r > x.r && !y.t.dead);
+    return !hi.length || hi.some(y => near(y.e.pk, x.e.pk) && (y.e.j[0] === "bad" || y.e.j[2] === "pre")) ? x.e.j[1] : "";
+  };
+  const firstBad = byR.find(badOf), firstPre = byR.find(x => preOf(x) && (!firstBad || x.r < firstBad.r)), lim = firstPre || firstBad;
+  const okBefore = byR.filter(x => !badOf(x) && !preOf(x) && !x.t.dead && (!lim || x.r < lim.r));
+  const baseR = (REF || AUTO)?.params?.PA09 != null ? +(REF || AUTO).params.PA09 : null, okMax = okBefore.length ? okBefore[okBefore.length - 1].r : null;
+  const tail = (firstPre ? `, <b>${firstPre.r}</b>에서 ${preOf(firstPre)}` : "") + (firstBad ? `, <b>${firstBad.r}</b>부터 ${badOf(firstBad)}` : "");
+  if (okMax != null) out.push(`✅ <b>응답성(PA09) ${okMax}까지는 안정</b>${tail || " (공진·헌팅 없음)"}${lim ? ` → 운용은 <b>PA09=${okMax}</b> 이하를 권장 (한계보다 1~2단계 낮게)` : ""}`);
+  else if (lim && baseR != null && baseR < lim.r) out.push(`✅ 기준(PA09=${baseR})은 정상${tail} — 그 사이 값(예: ${Math.round((baseR + lim.r) / 2)})도 측정해 보세요.`);
+  else if (lim) out.push(`🔴 가장 낮은 응답성 ${lim.r}에서도 ${badOf(lim) || preOf(lim)} — 응답성을 더 낮추거나 기계 쪽(체결·풀림)도 확인해 보세요.`);
+  if (firstBad && okMax != null && firstBad.r - okMax > 2 && !firstPre) out.push(`🔎 ${okMax}과 ${firstBad.r} 사이가 비어 있습니다 — 중간 값(예: ${Math.round((okMax + firstBad.r) / 2)})을 재면 한계를 더 정확히 알 수 있습니다.`);
   const vq = items.filter(x => x.e.vib && x.e.vib.j[0] === "hunt" && !(x.e.j[0] === "bad" || x.e.j[0] === "hunt"));
   if (vq.length) out.push(`📳 소리는 괜찮은데 <b>진동이 ${vq[0].t.vib.f}Hz로 ${vq[0].e.vib.ratio ?? "?"}배</b> 커진 측정이 있습니다 (${vq.map(x => esc(x.t.name.split("_")[0])).join(", ")}) — 응답성을 한 단계 낮추거나 PB06(관성비)·기계 고정 상태를 확인해 보세요.`);
-  const res = items.filter(x => x.e.j[0] === "bad" && x.e.pk && x.e.pk.f >= 100);
-  if (res.length) {
-    const cl = []; res.forEach(x => { const c = cl.find(c => Math.abs(c.f - x.e.pk.f) / c.f < 0.08); c ? (c.n++, c.f = (c.f * (c.n - 1) + x.e.pk.f) / c.n, c.ex = Math.max(c.ex, x.e.pk.ex)) : cl.push({ f: x.e.pk.f, n: 1, ex: x.e.pk.ex }); });
-    cl.sort((a, b) => b.n - a.n || b.ex - a.ex); const f = Math.round(cl[0].f);
-    out.push(`🎯 <b>노치 필터 후보: ${f.toLocaleString()} Hz</b> (공진 의심 ${cl[0].n}회, 최대 +${cl[0].ex}dB) → PB13(기계 공진 억제 필터 1)에 ${f <= 4500 ? `<b>${f}</b>` : "4500 Hz 이상이라 설정 범위 밖"} 근처 값을 넣고 다시 측정해 비교해 보세요.`);
-    if (cl[1]) out.push(`🎯 두 번째 후보: ${Math.round(cl[1].f).toLocaleString()} Hz → PB15(필터 2)`);
-    const after = items.filter(x => x.t.params?.PB13 && +x.t.params.PB13 !== 4500).pop(), before = res.filter(x => !x.t.params?.PB13 || +x.t.params.PB13 === 4500).pop();
+  const res = items.filter(x => (x.e.j[0] === "bad" || x.e.j[2] === "pre") && x.e.pk && x.e.pk.f >= 150), cand = [];
+  items.forEach(x => {                                    // 노치 후보: 각 측정의 가장 큰 봉우리 + 다른 큰 봉우리들 (공진 수준 2점 · 조짐 1점)
+    if (x.t.dead) return; const add = (f, ex, pr) => { const w = f < 150 ? 0 : ex >= TH.bad && pr >= TH.badProm ? 2 : ex >= TH.pre && pr >= TH.preProm ? 1 : 0; if (w) cand.push({ f, ex, w }); };
+    if (x.e.pk) add(x.e.pk.f, x.e.pk.ex, x.e.pk.prom ?? 0);
+    const h = x.e.pk && x.e.pk.f < 150 ? x.e.pk.f : 0, harm = f => h && Math.abs(f / h - Math.round(f / h)) < 0.04 * Math.round(f / h);   // 저주파(헌팅) 봉우리의 배음은 노치 후보 아님
+    (x.e.top || []).forEach(q => { if ((!x.e.pk || Math.abs(q.f - x.e.pk.f) / x.e.pk.f > 0.03) && !harm(q.f)) add(q.f, q.ex, q.prom ?? 0); });
+  });
+  if (cand.length) {
+    const cl = []; cand.forEach(q => { const c = cl.find(c => Math.abs(c.f - q.f) / c.f < 0.08); c ? (c.f = (c.f * c.w + q.f * q.w) / (c.w + q.w), c.w += q.w, c.n++, c.bad += q.w === 2, c.ex = Math.max(c.ex, q.ex)) : cl.push({ f: q.f, n: 1, w: q.w, bad: q.w === 2 ? 1 : 0, ex: q.ex }); });
+    cl.sort((a, b) => b.w - a.w || b.ex - a.ex);
+    const main = cl.filter(c => !cl.some(s => { const k = Math.round(c.f / s.f); return s !== c && k >= 2 && k <= 4 && Math.abs(c.f / s.f - k) < 0.03 * k && s.w >= Math.min(2, c.w); }));   // 다른 봉우리의 2~4배(배음)는 빼고 기본 주파수로
+    const f = Math.round(main[0].f), c0 = main[0];
+    out.push(`🎯 <b>노치 필터 후보: ${f.toLocaleString()} Hz</b> (${c0.bad ? `공진 수준 ${c0.bad}회` : ""}${c0.n - c0.bad ? `${c0.bad ? " · " : ""}조짐 ${c0.n - c0.bad}회` : ""}, 최대 +${c0.ex}dB) → PB13(기계 공진 억제 필터 1)에 ${f <= 4500 ? `<b>${f}</b>` : "4500 Hz 이상이라 설정 범위 밖"} 근처 값을 넣고 (PB01 = 매뉴얼 설정 _ _ _ 2) 다시 측정해 비교해 보세요.`);
+    if (main[1] && main[1].bad) out.push(`🎯 두 번째 후보: ${Math.round(main[1].f).toLocaleString()} Hz (공진 수준 ${main[1].bad}회) → PB15(기계 공진 억제 필터 2)`);
+    const nonDef = x => x.t.params?.PB13 != null && +x.t.params.PB13 !== 4500, after = items.filter(nonDef).pop(), before = res.filter(x => !nonDef(x)).pop();
     if (after && before) out.push(`🔁 PB13=${after.t.params.PB13}Hz 적용 뒤: 피크 ${after.e.pk ? sgn(after.e.pk.ex) : "—"} dB (적용 전 ${sgn(before.e.pk.ex)} dB) → ${after.e.j[1]} — ✓ 두 줄을 체크하고 📈 겹쳐 보기로 비교해 보세요`);
   }
   if (items.some(x => x.e.j[0] === "hunt")) out.push("🟠 150Hz 아래 소리가 크게 늘었습니다 — 헌팅 가능성: 응답성을 낮추거나 부하 관성 모멘트비(PB06)가 실제와 맞는지 확인해 보세요.");
-  if (!REF && items.length) out.push('💡 지금은 <b>정지 배경</b> 대비라서 정상 구동음도 "커짐"으로 보일 수 있습니다. 낮은 응답성 측정 줄의 ☆를 눌러 <b>기준</b>으로 정하면 더 정확합니다.');
+  if (items.some(x => x.e.j[2] === "mains")) out.push("🔌 50·60Hz 배수(100·120Hz 등)가 커진 측정이 있습니다 — 서보보다 변압기·컴프레서·팬 같은 설비 소음일 수 있습니다. 그 설비를 끄고(또는 같은 상태에서) 다시 재 보세요.");
+  if (items.some(x => x.t.bumps > 0)) out.push(`💥 휴대폰을 건드리거나 '쿵' 소리가 난 순간은 빼고 계산했습니다 (${items.filter(x => x.t.bumps > 0).map(x => esc(x.t.name.split("_")[0])).join(", ")}).`);
+  if (!REF && AUTO) out.push(`💡 🚗 기준 운전이 없어 응답성이 가장 낮은 측정(<b>${esc(AUTO.name.split("_")[0])}</b>)을 <b>자동 기준</b>으로 비교했습니다 — 다른 측정의 ☆를 누르면 기준을 바꿀 수 있습니다.`);
+  else if (!REF && items.length) out.push('💡 지금은 <b>정지 배경</b> 대비라서 정상 구동음도 "커짐"으로 보일 수 있습니다. 낮은 응답성으로 <b>🚗 기준 운전</b>을 재거나, 응답성을 바꿔 한 번 더 재면 가장 낮은 응답성 측정이 자동 기준이 됩니다.');
   out.push('<span style="color:var(--dim)">※ 마이크·휴대폰 센서로 본 참고값입니다. 머신 애널라이저의 주파수 응답과 함께 판단하세요.</span>');
   return out.join("<br>");
 }
@@ -691,11 +891,11 @@ const safe = n => String(n).replace(/[^\w=.\-]+/g, "_");
 const dl = (blob, name) => { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 30000); };
 const vibCsv = t => new Blob(["﻿ms,x,y,z\r\n" + t.vib.raw.map(r => r.join(",")).join("\r\n")], { type: "text/csv" });
 function makeCsv(L) {
-  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`, head = ["#", "프로젝트", "시각", "녹음 이름", ...P.map(p => `${p.no} ${p.ab}`), "길이(초)", "비교 기준", "전체 dB", "대비 dB", "피크 Hz", "피크 대비 dB", "봉우리 2", "봉우리 3", "판정", "진동 3~30Hz m/s²", "진동 전체 m/s²", "진동 대비(배)", "진동 Hz", "왕복 Hz", "진동 판정", "기기", "메모", "구분"];
-  const rows = L.map(({ t, e }, k) => [k + 1, projName(t.proj), new Date(t.at).toLocaleString("ko-KR"), t.name, ...P.map(p => t.params?.[p.no] ?? ""), t.sec, e.base, showDb(e.lv), e.ex != null ? e.ex.toFixed(1) : "", e.pk?.f ?? "", e.pk?.ex ?? "", e.top?.[1] ? `${e.top[1].f}Hz ${sgn(e.top[1].ex)}` : "", e.top?.[2] ? `${e.top[2].f}Hz ${sgn(e.top[2].ex)}` : "", e.j[1], t.vib ? hiOf(t.vib) : "", t.vib?.rms ?? "", e.vib?.ratio ?? "", t.vib?.f ?? "", t.vib?.mamp > 0.05 ? t.vib.mf : "", e.vib?.j[1] ?? "", t.dev?.name || "", t.memo || "", (REF && REF.id === t.id) || t.isRef ? "기준 운전" : t.remote ? "휴대폰에서 받음" : ""]);
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`, head = ["#", "프로젝트", "시각", "녹음 이름", ...P.map(p => `${p.no} ${p.ab}`), "길이(초)", "비교 기준", "전체 dB", "대비 dB", "피크 Hz", "피크 대비 dB", "봉우리 2", "봉우리 3", "판정", "진동 3~30Hz m/s²", "진동 전체 m/s²", "진동 대비(배)", "진동 Hz", "왕복 Hz", "진동 판정", "기기", "메모", "구분", "쿵 뺀 횟수", "진동 뾰족함", "봉우리 날카로움 dB"];
+  const rows = L.map(({ t, e }, k) => [k + 1, projName(t.proj), new Date(t.at).toLocaleString("ko-KR"), t.name, ...P.map(p => t.params?.[p.no] ?? ""), t.sec, e.base, showDb(e.lv), e.ex != null ? e.ex.toFixed(1) : "", e.pk?.f ?? "", e.pk?.ex ?? "", e.top?.[1] ? `${e.top[1].f}Hz ${sgn(e.top[1].ex)}` : "", e.top?.[2] ? `${e.top[2].f}Hz ${sgn(e.top[2].ex)}` : "", e.j[1], t.vib ? hiOf(t.vib) : "", t.vib?.rms ?? "", e.vib?.ratio ?? "", t.vib?.f ?? "", t.vib?.mamp > 0.05 ? t.vib.mf : "", e.vib?.j[1] ?? "", t.dev?.name || "", t.memo || "", (REF && REF.id === t.id) || t.isRef ? "기준 운전" : t.remote ? "휴대폰에서 받음" : "", t.bumps || "", t.vib?.kurt ?? "", e.pk?.prom ?? ""]);
   return new Blob(["﻿" + [head, ...rows].map(r => r.map(q).join(",")).join("\r\n")], { type: "text/csv" });
 }
-const curL = async () => (await allT()).map(t => ({ t, e: evalTake(t) }));
+const curL = async () => { const l = await allT(); pickAuto(l); return l.map(t => ({ t, e: evalTake(t) })); };
 $("bCsv").onclick = async () => { const L = await curL(); if (!L.length) { toast("저장할 결과가 없습니다"); return; } dl(makeCsv(L), `ServoEar_Result_${projAscii()}_${stamp()}.csv`); toast(`📊 ${L.length}건을 CSV로 저장했습니다 (다운로드 폴더)`); };
 const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1), ANDROID = /Android/i.test(navigator.userAgent);
 $("bShare").onclick = async () => {
@@ -732,7 +932,7 @@ $("shGo").onclick = async () => {
   for (const f of files) { dl(f, f.name); await new Promise(r => setTimeout(r, 250)); }
   toast(`📁 공유 창을 쓸 수 없어 ${files.length}개 파일을 다운로드 폴더에 저장했습니다`, 4000);
 };
-$("bClr").onclick = async () => { const l = await allT(); if (!l.length) return; if (!confirm(`📁 ${projName()}의 측정 결과 ${l.length}건을 모두 지울까요?`)) return; for (const t of l) await delT(t.id); REFID = null; ls.set(pk("ref"), null); await loadRef(); cmpSel.clear(); renderRes(); };
+$("bClr").onclick = async () => { if (busy) return toast("측정이 끝난 뒤에 해 주세요"); const l = await allT(); if (!l.length) return toast("지울 결과가 없습니다"); if (!confirm(`📁 ${projName()}의 측정 결과 ${l.length}건을 모두 지울까요?`)) return; await delMany(l.map(t => t.id)); REFID = null; ls.set(pk("ref"), null); await loadRef(); cmpSel.clear(); renderRes(); };
 
 // ================= 📄 보고서 (A4 → 인쇄 · PDF) =================
 $("bRep").onclick = async () => {
@@ -759,31 +959,48 @@ $("bRep").onclick = async () => {
 
 // ================= 📥 MR Configurator2 파라미터 불러오기 (CSV·TXT) =================
 $("bImp").onclick = () => $("impFile").click();
-function decodeText(buf) {
-  for (const enc of ["utf-8", "euc-kr", "shift_jis", "utf-16le"]) { try { const s = new TextDecoder(enc, { fatal: enc === "utf-8" }).decode(buf); if (!/�/.test(s) && /P[A-F]\d{2}/i.test(s)) return s; } catch (e) {} }
-  return new TextDecoder("utf-8").decode(buf);
+function decodeText(buf) {                                // UTF-8 / UTF-16 / EUC-KR(한글 Windows) / Shift-JIS(일본어 Windows) 자동 판별
+  const u8 = new Uint8Array(buf), td = (enc, fatal) => new TextDecoder(enc, fatal ? { fatal: true } : undefined).decode(buf);
+  if (u8[0] === 0xff && u8[1] === 0xfe) return td("utf-16le"); if (u8[0] === 0xfe && u8[1] === 0xff) return td("utf-16be");
+  let z = 0; for (let i = 1; i < Math.min(u8.length, 4000); i += 2) if (u8[i] === 0) z++; if (z > Math.min(u8.length, 4000) / 5) return td("utf-16le");
+  try { return td("utf-8", true); } catch (e) {}
+  const KW = { "euc-kr": [/[가-힣]/g, /약칭|명칭|설정|단위|범위|파라미터|값/g], shift_jis: [/[぀-ヿ]/g, /略称|名称|設定|単位|範囲|パラメータ|値/g] };
+  const c = Object.entries(KW).map(([enc, [ch, kw]]) => { try { const s = td(enc); return { s, sc: (s.match(kw) || []).length * 50 + (s.match(ch) || []).length - (s.match(/�/g) || []).length * 20 }; } catch (e) { return null; } }).filter(Boolean).sort((x, y) => y.sc - x.sc);
+  return c.length ? c[0].s : td("utf-8");
 }
-function parseParams(text) {                              // 'PA09' 같은 줄에서 설정값 찾기 (머리줄에 설정값/設定値/Setting 이 있으면 그 칸)
-  const lines = text.split(/\r?\n/), split = l => (l.includes("\t") ? l.split("\t") : l.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)).map(c => c.replace(/^"|"$/g, "").trim());
-  let vcol = -1, ccol = -1; const found = {};
-  for (const l of lines) {
-    const c = split(l);
-    const hv = c.findIndex(x => /설정값|設定値|setting value|^value$|현재값|設定/i.test(x)); if (hv >= 0 && !c.some(x => /^P[A-F]\d{2}$/i.test(x))) { vcol = hv; ccol = c.findIndex(x => /^no\.?$|번호|パラメータ|parameter/i.test(x)); continue; }
-    const ci = c.findIndex(x => /^P[A-F]\d{2}$/i.test(x)); if (ci < 0) continue;
-    const code = c[ci].toUpperCase(); let val = null;
-    if (vcol >= 0 && c[vcol] != null && c[vcol] !== "") val = c[vcol];
-    else for (let k = ci + 1; k < c.length; k++) { if (/^-?\d+(\.\d+)?$/.test(c[k]) || /^[0-9A-F]{4}h?$/i.test(c[k])) { val = c[k]; break; } }
-    if (val != null) found[code] = val.replace(/h$/i, "");
+function parseParams(text) {                              // MR Configurator2 파라미터 파일 → { PA09: "16", … }
+  // 실제 MRC2 1.170C [Save As] 확인(2026-10): CSV = 1줄 '.,' · 2줄 기종(예: MR-J4-A (-RJ) Standard) · 3줄 머리 No.,Abbr.,Name,Value,Unit,Setting range
+  //   (일본어 No.,略称,名称,値,単位,設定範囲 · 한국어 No.,약칭,명칭,값,단위,설정 범위) · 그 뒤 PA09,RSP,Auto tuning response,16,, 1-40 · 16진은 0001 처럼 4자리, 값 없음은 ----
+  //   .prm2 = XML(<lang>en</lang> · <ampType>) 안의 <Parameters> 에 같은 줄들이 머리줄 없이 들어 있음
+  const out = {}; text = String(text || "").replace(/^﻿/, "");
+  const model = (text.match(/<ampType>([^<]+)<\/ampType>/i) || [])[1] || (text.split(/\r?\n/, 4).find(l => /^\s*"?MR-[A-Z0-9]/i.test(l)) || "").replace(/[",]+/g, " ").trim();
+  const xm = text.match(/<Parameters>([\s\S]*?)<\/Parameters>/i); if (xm) text = xm[1];
+  const split = l => (l.includes("\t") ? l.split("\t") : l.includes(",") ? l.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/) : l.includes(";") ? l.split(";") : l.trim().split(/\s{2,}/)).map(c => c.replace(/^\s*"|"\s*$/g, "").replace(/""/g, '"').trim());
+  const isCode = x => /^P[A-Z]\d{2}$/i.test(x), VAL = /^(値|設定値|現在値|값|설정값|설정 값|현재값|value|setting value|set value|current value|setting)$/i, RANGE = /範囲|범위|range/i;
+  let vcol = -1;
+  for (const l of text.split(/\r?\n/)) {
+    const c = split(l), ci = c.findIndex(isCode);
+    if (ci < 0) { let hv = c.findIndex(x => VAL.test(x)); if (hv < 0 && c.some(x => /^(no\.?|番号|번호)$/i.test(x))) hv = c.findIndex(x => /設定|설정|value/i.test(x) && !RANGE.test(x)); if (hv >= 0) vcol = hv; continue; }
+    const code = c[ci].toUpperCase(); if (out[code] != null) continue;     // 여러 축이 이어지면 첫 축 값
+    let val = null;
+    if (vcol > ci && c[vcol] != null && c[vcol] !== "") val = c[vcol];
+    else for (let k = ci + 1; k < c.length; k++) { if (/^-?\d+(\.\d+)?$/.test(c[k]) || /^(?=.*\d)[0-9A-F]{4}h?$/i.test(c[k])) { val = c[k]; break; } }
+    if (val != null && !/^-+$/.test(val) && /^-?[0-9A-F.]+h?$/i.test(val)) out[code] = val.replace(/h$/i, "");
   }
-  return found;
+  if (!Object.keys(out).length) for (const m of text.matchAll(/\b(P[A-Z]\d{2})\s*[=:]\s*(-?[0-9A-F.]+)/gi)) out[m[1].toUpperCase()] ??= m[2];   // 'PA09=16' 같은 메모
+  if (model) Object.defineProperty(out, "model", { value: model, enumerable: false });
+  return out;
 }
+const conv = (p, v) => p.type === "sel" ? (x => (p.opts.some(o => o[0] === x) ? x : String(parseInt(v, 10))))(String(parseInt(String(v).slice(-1), 16)))   // 16진 4자리(0001)는 끝자리 = 모드
+  : p.type === "text" ? String(v).toUpperCase().padStart(4, "0") : fmtVal(p, v);
 $("impFile").onchange = async e => {
   const f = e.target.files[0]; e.target.value = ""; if (!f) return;
-  const found = parseParams(decodeText(await f.arrayBuffer())), hit = P.filter(p => found[p.no] != null);
-  if (!hit.length) { toast("파일에서 PA·PB 파라미터를 찾지 못했습니다 — MR Configurator2에서 파라미터를 CSV(또는 텍스트)로 저장한 파일을 골라 주세요", 6000); return; }
-  const diff = hit.filter(p => String(fmtVal(p, found[p.no])) !== String(V[p.no]));
-  if (!confirm(`${f.name}\n\n파라미터 ${hit.length}개를 찾았습니다 (바뀌는 값 ${diff.length}개):\n${hit.map(p => `${p.no} ${p.ab} = ${found[p.no]}${String(fmtVal(p, found[p.no])) !== String(V[p.no]) ? `  (지금 ${V[p.no]})` : ""}`).join("\n")}\n\n표에 넣을까요?`)) return;
-  hit.forEach(p => { V[p.no] = p.type === "sel" ? String(parseInt(found[p.no], 10)) : p.type === "text" ? found[p.no].padStart(4, "0") : fmtVal(p, found[p.no]); });
+  let found; try { if (f.size > 20e6) throw new Error("파일이 너무 큽니다"); found = parseParams(decodeText(await f.arrayBuffer())); } catch (er) { toast("파일을 읽지 못했습니다: " + er.message, 5000); return; }
+  const hit = P.filter(p => found[p.no] != null);
+  if (!hit.length) { toast("파일에서 PA·PB 파라미터를 찾지 못했습니다 — MR Configurator2 파라미터 설정 창의 [Save As(다른 이름으로 저장)]로 만든 CSV 또는 .prm2 파일을 골라 주세요", 6000); return; }
+  const diff = hit.filter(p => String(conv(p, found[p.no])) !== String(V[p.no]));
+  if (!confirm(`${f.name}${found.model ? ` (${found.model})` : ""}\n\n파라미터 ${hit.length}개를 찾았습니다 (바뀌는 값 ${diff.length}개):\n${hit.map(p => `${p.no} ${p.ab} = ${conv(p, found[p.no])}${String(conv(p, found[p.no])) !== String(V[p.no]) ? `  (지금 ${V[p.no]})` : ""}`).join("\n")}\n\n표에 넣을까요?`)) return;
+  hit.forEach(p => { V[p.no] = conv(p, found[p.no]); });
   saveV(); renderParams(); toast(`📥 ${hit.length}개 파라미터를 불러왔습니다 (${hit.map(p => p.no).join(", ")})`, 4000);
 };
 
@@ -792,23 +1009,27 @@ const RELAY = "https://ntfy.sh/", PUBLIC = "https://s95722462-cell.github.io/aut
 const rid = () => { const a = new Uint8Array(10); crypto.getRandomValues(a); return [...a].map(b => b.toString(36).padStart(2, "0")).join("").slice(0, 14); };
 let es = null;
 { const q = new URLSearchParams(location.search).get("link"); if (q) { ls.set("linkSend", q); history.replaceState(null, "", location.pathname); setTimeout(() => toast("🔗 PC와 연결했습니다 — 측정할 때마다 PC 화면에 결과가 갑니다", 5000), 800); } }
-function linkStatus() { const s = ls.get("linkSend", null), h = ls.get("linkHost", null); $("stLink").hidden = !(s || h); $("stLink").textContent = s ? "🔗 PC로 보냄" : h ? "🔗 휴대폰 받는 중" : ""; }
+function linkStatus() { const s = ls.get("linkSend", null), h = ls.get("linkHost", null); $("stLink").hidden = !(s || h); $("stLink").textContent = s ? "🔗 PC로 보냄" : h ? (typeof EventSource === "undefined" ? "🔗 이 브라우저는 실시간 받기 불가" : "🔗 휴대폰 받는 중") : ""; }
 function linkSend(t, e) {                                 // 휴대폰: 측정 요약을 PC로 (녹음·원본 데이터는 안 보냄)
   const code = ls.get("linkSend", null); if (!code) return;
   const msg = { v: 1, id: t.id, at: t.at, proj: projName(t.proj), name: t.name, params: t.params, sec: t.sec, memo: t.memo, dev: t.dev?.name, isRef: t.isRef,
     ev: { base: e.base, lv: Math.round(e.lv * 10) / 10, ex: e.ex != null ? Math.round(e.ex * 10) / 10 : null, pk: e.pk, top: e.top, j: e.j, vib: e.vib },
-    vib: t.vib ? { rms: t.vib.rms, rmsHi: t.vib.rmsHi, f: t.vib.f, sharp: t.vib.sharp, mf: t.vib.mf, mamp: t.vib.mamp, fs: t.vib.fs } : null };
+    vib: t.vib ? { rms: t.vib.rms, rmsHi: t.vib.rmsHi, f: t.vib.f, sharp: t.vib.sharp, mf: t.vib.mf, mamp: t.vib.mamp, fs: t.vib.fs, kurt: t.vib.kurt, shocks: t.vib.shocks } : null, bumps: t.bumps || 0 };
   fetch(RELAY + "servoear-" + code, { method: "POST", body: JSON.stringify(msg) }).then(() => toast("🔗 PC로 보냈습니다", 1500)).catch(() => toast("🔗 PC로 보내지 못했습니다 (인터넷 확인)", 3000));
 }
 function hostListen() {                                   // PC: 휴대폰 결과 받기
   const code = ls.get("linkHost", null); es?.close(); es = null; linkStatus(); if (!code) return;
-  es = new EventSource(RELAY + "servoear-" + code + "/sse?since=" + Math.floor(Date.now() / 1000 - 12 * 3600));
+  if (typeof EventSource === "undefined") { $("stLink").textContent = "🔗 이 브라우저는 실시간 받기 불가"; return; }
+  try { es = new EventSource(RELAY + "servoear-" + code + "/sse?since=" + Math.floor(Date.now() / 1000 - 12 * 3600)); } catch (e) { $("stLink").textContent = "🔗 연결 실패"; return; }
+  es.onerror = () => { if ($("stLink")) $("stLink").textContent = navigator.onLine === false ? "🔗 인터넷 끊김 (다시 연결 중)" : "🔗 다시 연결 중…"; };
+  es.onopen = () => linkStatus();
   es.onmessage = async m => {
     try {
-      const d = JSON.parse(m.data); if (d.event !== "message") return; const x = JSON.parse(d.message); if (x.v !== 1) return;
+      const d = JSON.parse(m.data); if (d.event !== "message") return; const x = JSON.parse(d.message); if (x.v !== 1 || !x.id || !x.ev || !Array.isArray(x.ev.j)) return;
+      x.name = String(x.name || "측정").slice(0, 120); x.proj = String(x.proj || "휴대폰").slice(0, 40);
       const all = await allAll(); if (all.some(t => t.id === "r" + x.id)) return;
       let p = PROJS.find(p => p.name === "📱 " + x.proj); if (!p) { p = { id: "p" + Date.now().toString(36), name: "📱 " + x.proj }; PROJS.push(p); ls.set("projects", PROJS); renderProj(); }
-      await putT({ id: "r" + x.id, at: x.at, proj: p.id, name: x.name, params: x.params, sec: x.sec, memo: x.memo, dev: { name: x.dev || "휴대폰" }, remote: true, isRef: x.isRef, ev: x.ev, vib: x.vib, lv: x.ev.lv });
+      await putT({ id: "r" + x.id, at: x.at, proj: p.id, name: x.name, params: x.params, sec: x.sec, memo: x.memo, dev: { name: x.dev || "휴대폰" }, remote: true, isRef: x.isRef, ev: x.ev, vib: x.vib, lv: x.ev.lv, bumps: +x.bumps || 0 });
       if (p.id !== CUR) { CUR = p.id; ls.set("proj", CUR); loadProj(); await loadRef(); renderProj(); renderParams(); bgLabel(); }
       renderRes(); toast(`📱 휴대폰 측정 도착: ${x.name} — ${x.ev.j[1]}`, 3500);
     } catch (er) {}
@@ -819,8 +1040,8 @@ $("bLink").onclick = async () => {
   if (s) b.innerHTML = `이 기기(휴대폰)는 <b>PC로 측정 결과를 보내는 중</b>입니다.<br>측정할 때마다 결과 숫자(파라미터·판정·진동)가 PC 화면 표에 바로 추가됩니다. 녹음 파일은 보내지 않습니다.<div class="note">중계: ntfy.sh (무료 공개 중계) · 연결 코드 ${s.slice(0, 4)}…</div>`;
   else {
     const code = h || rid(); ls.set("linkHost", code); hostListen();
-    b.innerHTML = `<b>휴대폰으로 이 QR을 찍으세요.</b> 휴대폰 Servo Ear가 열리고, 그 뒤 휴대폰에서 측정할 때마다 결과가 <b>이 PC 화면</b>에 바로 들어옵니다.<div id="lqr" style="display:flex;justify-content:center;margin:10px 0"></div><div class="note">보내는 것: 측정 숫자(파라미터·판정·진동)만 · 녹음은 휴대폰에 남음 · 중계: ntfy.sh (무료 공개 중계) · 이 창을 닫아도 PC는 계속 받습니다.</div>`;
-    try { await loadScript("https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js", () => window.QRCode); new QRCode($("lqr"), { text: (location.protocol.startsWith("http") ? location.href.split("?")[0].split("#")[0] : PUBLIC) + "?link=" + code, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M }); } catch (e) { $("lqr").textContent = "QR 도구를 불러오지 못했습니다 (인터넷 확인)"; }
+    b.innerHTML = `<b>휴대폰으로 이 QR을 찍으세요.</b> 휴대폰 Servo Ear가 열리고, 그 뒤 휴대폰에서 측정할 때마다 결과가 <b>이 PC 화면</b>에 바로 들어옵니다.<div id="lqr" style="display:flex;justify-content:center;margin:10px 0"></div><div class="note" style="text-align:center;word-break:break-all">QR이 안 보이면 휴대폰에서 이 주소를 여세요: <b>${esc((location.protocol.startsWith("http") ? location.href.split("?")[0].split("#")[0] : PUBLIC) + "?link=" + code)}</b></div><div class="note">보내는 것: 측정 숫자(파라미터·판정·진동)만 · 녹음은 휴대폰에 남음 · 중계: ntfy.sh (무료 공개 중계) · 이 창을 닫아도 PC는 계속 받습니다.</div>`;
+    try { await loadScript("https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js", () => window.QRCode); new QRCode($("lqr"), { text: (location.protocol.startsWith("http") ? location.href.split("?")[0].split("#")[0] : PUBLIC) + "?link=" + code, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M }); } catch (e) { $("lqr").textContent = "QR 도구를 불러오지 못했습니다 (인터넷 확인) — 아래 주소를 휴대폰에 직접 입력해도 됩니다"; }
   }
   linkStatus(); $("linkDlg").showModal();
 };
@@ -831,12 +1052,14 @@ $("linkOff").onclick = () => { ls.set("linkSend", null); ls.set("linkHost", null
 function renderProj() { $("projSel").innerHTML = PROJS.map(p => `<option value="${p.id}"${p.id === CUR ? " selected" : ""}>${esc(p.name)}</option>`).join(""); }
 async function switchProj(id) { CUR = id; ls.set("proj", CUR); cmpSel.clear(); loadProj(); await loadRef(); renderProj(); renderParams(); bgLabel(); renderRes(); toast(`📁 ${projName()}`); }
 $("projSel").onchange = e => switchProj(e.target.value);
-$("projAdd").onclick = () => { const n = prompt("새 프로젝트 이름 (예: 1호기 X축)", ""); if (!n || !n.trim()) return; const p = { id: "p" + Date.now().toString(36), name: n.trim() }; PROJS.push(p); ls.set("projects", PROJS); ls.set("vals_" + p.id, { ...V }); switchProj(p.id); };
-$("projRen").onclick = () => { const p = PROJS.find(x => x.id === CUR), n = prompt("프로젝트 이름", p.name); if (!n || !n.trim()) return; p.name = n.trim(); ls.set("projects", PROJS); renderProj(); renderRes(); };
+const pname = n => String(n || "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 40);
+$("projAdd").onclick = () => { if (busy) return toast("측정이 끝난 뒤에 해 주세요"); const n = pname(prompt("새 프로젝트 이름 (예: 1호기 X축)", "")); if (!n) return; if (PROJS.some(p => p.name === n)) return toast(`'${n}' 프로젝트가 이미 있습니다`); const p = { id: "p" + Date.now().toString(36), name: n }; PROJS.push(p); ls.set("projects", PROJS); ls.set("vals_" + p.id, { ...V }); switchProj(p.id); };
+$("projRen").onclick = () => { const p = PROJS.find(x => x.id === CUR); if (!p) return; const n = pname(prompt("프로젝트 이름", p.name)); if (!n || n === p.name) return; if (PROJS.some(x => x !== p && x.name === n)) return toast(`'${n}' 프로젝트가 이미 있습니다`); p.name = n; ls.set("projects", PROJS); renderProj(); renderRes(); };
 $("projDel").onclick = async () => {
-  if (PROJS.length < 2) { toast("프로젝트가 하나뿐이라 지울 수 없습니다"); return; }
+  if (busy) { toast("측정이 끝난 뒤에 해 주세요"); return; }
+  if (PROJS.length < 2) { toast("프로젝트가 하나뿐이라 지울 수 없습니다 (✎로 이름을 바꾸거나 🗑 결과 지우기를 쓰세요)"); return; }
   const l = await allT(); if (!confirm(`📁 '${projName()}' 프로젝트와 측정 ${l.length}건을 지울까요? 되돌릴 수 없습니다.`)) return;
-  for (const t of l) await delT(t.id); ["bg", "vbg", "vals", "memo", "ref"].forEach(k => { try { localStorage.removeItem("sear_" + pk(k)); } catch (e) {} });
+  await delMany(l.map(t => t.id)); ["bg", "vbg", "vals", "memo", "ref"].forEach(k => { try { localStorage.removeItem("sear_" + pk(k)); } catch (e) {} });
   PROJS = PROJS.filter(p => p.id !== CUR); ls.set("projects", PROJS); switchProj(PROJS[0].id);
 };
 
@@ -852,7 +1075,7 @@ document.addEventListener("keydown", e => {
 (async () => { loadProj(); await loadRef(); renderProj(); renderParams(); bgLabel(); vibLabel(); renderRes(); hostListen(); linkStatus(); })();
 if (!navigator.mediaDevices?.getUserMedia) toast("이 브라우저는 마이크를 쓸 수 없습니다", 5000);
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
-window.__se = { allT, allAll, get BG() { return BG; }, get REF() { return REF; }, get V() { return V; }, parseParams, evalTake, get CUR() { return CUR; } };   // 시험용
+window.__se = { allT, allAll, get BG() { return BG; }, get REF() { return REF; }, get AUTO() { return AUTO; }, get V() { return V; }, parseParams, decodeText, evalTake, specAvg, vibAnalyze, bandLevel, putT, TH, get CUR() { return CUR; }, renderRes, advise: () => curL().then(advise) };   // 시험용
 })();
 </script>
 </body>
