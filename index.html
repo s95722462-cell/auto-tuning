@@ -51,6 +51,7 @@
   .prog { flex: 1; min-width: 120px; height: 12px; border: 1px solid #8fa3ba; background: #fff; } .prog i { display: block; height: 100%; width: 0; background: linear-gradient(#7fd17f, #2e9e3a); }
   .j { font-weight: 700; } .j.ok { color: var(--ok); } .j.warn { color: var(--warn); } .j.bad { color: var(--bad); } .j.hunt { color: var(--hunt); }
   .res td button { height: 20px; padding: 0 6px; font-size: 11px; border: 1px solid #9fb0c4; background: #f4f6f8; cursor: pointer; border-radius: 2px; }
+  .vibc { font-size: 11.5px; } .vibc b { font-family: Consolas, monospace; }
   .advice { margin-top: 8px; padding: 8px 10px; border: 1px solid #e3c770; background: #fffbe8; font-size: 12.5px; line-height: 1.7; }
   .advice:empty { display: none; }
   .note { font-size: 11.5px; color: var(--dim); line-height: 1.6; margin-top: 6px; }
@@ -66,11 +67,12 @@
 </head>
 <body>
 <div class="app">
-  <div class="tbar">🔊 Servo Ear <small>— 서보 소리 분석기 (MR-J4 튜닝 보조)</small><span class="sp"></span><span class="st" id="stMic">마이크: 꺼짐</span><span class="st" id="stBg">배경 소음: 미측정</span></div>
+  <div class="tbar">🔊 Servo Ear <small>— 서보 소리 분석기 (MR-J4 튜닝 보조)</small><span class="sp"></span><span class="st" id="stMic">마이크: 꺼짐</span><span class="st" id="stVib">진동: 꺼짐</span><span class="st" id="stBg">배경 소음: 미측정</span></div>
   <div class="menu"><span>프로젝트(P)</span><span>측정(M)</span><span>파라미터(A)</span><span>결과(R)</span><span>도움말(H)</span></div>
   <div class="tool">
     <button class="tb" id="bMic" title="마이크 켜기 (실시간 스펙트럼)"><i>🎙</i>마이크 ON</button>
-    <button class="tb" id="bBg" title="모터를 멈춘 상태에서 공장 소음을 5초 측정"><i>🔇</i>배경 소음</button>
+    <button class="tb" id="bVib" title="휴대폰 가속도 센서로 진동 재기 (휴대폰을 기계 위에 고정)"><i>📳</i>진동 ON</button>
+    <button class="tb" id="bBg" title="모터를 멈춘 상태에서 주변 소음·진동을 5초 측정"><i>🔇</i>배경 측정</button>
     <div class="sep"></div>
     <button class="tb rec" id="bRec" title="지금 파라미터 값으로 이름을 붙여 녹음·분석"><i>⏺</i>측정 기록</button>
     <label style="font-size:12px">길이 <select id="recLen"><option value="5">5초</option><option value="10" selected>10초</option><option value="20">20초</option><option value="30">30초</option></select></label>
@@ -101,12 +103,18 @@
         <div class="readout"><span>피크 <b id="rPk">— Hz</b></span><span>배경 대비 <b id="rEx">—</b></span><span>전체 <b id="rLv">— dB</b></span><span id="rAl"></span></div>
         <div class="bar"><span id="recState">대기</span><div class="prog"><i id="recProg"></i></div><span id="recLeft"></span></div>
       </div>
+      <div class="win" id="vibWin" hidden>
+        <h3>📳 진동 (휴대폰 가속도 센서 · 0.5 ~ 30Hz) <span class="sp"></span><span id="vibFs" style="font-weight:400"></span></h3>
+        <div class="scope"><canvas id="vcv" width="1200" height="300" style="height:150px"></canvas></div>
+        <div class="readout"><span style="color:#ff7070">X</span><span style="color:#7dff7d">Y</span><span style="color:#7db8ff">Z</span><span>진동 <b id="vRms">— m/s²</b></span><span>배경 대비 <b id="vRat">—</b></span><span>주파수 <b id="vF">— Hz</b></span><span id="vAl"></span></div>
+      </div>
       <div class="win" style="min-height:0">
         <h3>🧾 측정 결과 (게인 값별 비교) <span class="sp"></span><span id="resCount" style="font-weight:400"></span></h3>
         <div class="body" style="max-height:420px">
-          <table class="res"><thead><tr><th>#</th><th>시각</th><th>녹음 이름</th><th>전체 (배경 대비)</th><th>피크 주파수</th><th>피크 (배경 대비)</th><th>판정</th><th></th></tr></thead><tbody id="rtab"></tbody></table>
+          <table class="res"><thead><tr><th>#</th><th>시각</th><th>녹음 이름</th><th>전체 (배경 대비)</th><th>피크 주파수</th><th>피크 (배경 대비)</th><th>판정</th><th>📳 진동 (배경 대비 · Hz)</th><th>진동 판정</th><th></th></tr></thead><tbody id="rtab"></tbody></table>
           <div class="advice" id="advice"></div>
           <div class="note">판정: <span class="j ok">✅ 조용</span>(+6dB 미만) · <span class="j warn">⚠ 약간</span> · <span class="j bad">🔴 공진 의심</span>(좁은 피크 +12dB 이상) · <span class="j hunt">🟠 헌팅/저주파 의심</span>(150Hz 아래 +10dB 이상).
+          진동: <span class="j ok">✅</span> 배경의 1.5배 미만 · <span class="j warn">⚠ 흔들림</span> 1.5~3배 · <span class="j hunt">🟠 헌팅 의심</span> 3배 이상이고 한 주파수가 뚜렷함.
           마이크로 들리는 소리만 보는 <b>보조 자료</b>입니다 — 최종 판단은 머신 애널라이저·그래프로 하세요.</div>
         </div>
       </div>
@@ -117,8 +125,9 @@
 
 <dialog id="helpDlg"><h4>❔ Servo Ear 사용법</h4><div class="db">
   <ol style="margin:0;padding-left:20px">
-    <li>휴대폰·마이크를 <b>모터·커플링·볼스크루 근처 30cm 안</b>에 고정합니다.</li>
-    <li><b>🎙 마이크 ON</b> → 모터를 <b>멈춘 상태</b>에서 <b>🔇 배경 소음</b> (5초).</li>
+    <li>휴대폰을 <b>기계의 고정된 부분(베드·프레임) 위에 테이프·자석 거치대로 단단히</b> 붙입니다. 소리는 모터·커플링·볼스크루 가까울수록 좋습니다.<br><span style="color:#b33">⚠ 움직이는 테이블·슬라이더 위에는 두지 마세요 (떨어지거나 끼일 수 있음).</span></li>
+    <li><b>📳 진동 ON</b> (아이폰은 '동작 및 방향 접근' 허용) — 휴대폰에만 있는 센서라 PC에서는 소리만 잽니다.</li>
+    <li><b>🎙 마이크 ON</b> → 모터를 <b>멈춘 상태</b>에서 <b>🔇 배경 측정</b> (5초, 소리·진동 함께).</li>
     <li>MR Configurator2에서 오토튜닝 응답성(PA09) 등을 정하고 <b>왼쪽 표에도 같은 값</b>을 넣습니다.</li>
     <li>운전(왕복) 중에 <b>⏺ 측정 기록</b> → 정한 시간 동안 녹음·분석 → 아래 표에 한 줄 추가.</li>
     <li>응답성을 올려 가며 반복 → 공진이 나오면 <b>노치 필터 후보</b>를 PB13에 넣고 다시 측정해 비교.</li>
@@ -274,14 +283,76 @@ function draw() {
 }
 grid();
 
+// ================= 📳 진동 (DeviceMotion 가속도) =================
+let vibOn = false, vbuf = [], vSink = null, vFs = 0, vLast = 0, VBG = ls.get("vbg", null), gAvg = null;
+function onMotion(e) {
+  const a = e.acceleration && e.acceleration.x != null ? e.acceleration : null, g = e.accelerationIncludingGravity;
+  let x, y, z;
+  if (a) { x = a.x; y = a.y; z = a.z; }
+  else if (g && g.x != null) {                              // 중력 포함 값만 주는 기기: 천천히 따라가는 평균(중력)을 빼서 진동만
+    gAvg = gAvg ? gAvg.map((v, i) => v + ([g.x, g.y, g.z][i] - v) * 0.02) : [g.x, g.y, g.z]; x = g.x - gAvg[0]; y = g.y - gAvg[1]; z = g.z - gAvg[2];
+  } else return;
+  const t = performance.now(); if (vLast) vFs = vFs ? vFs * 0.98 + 0.02 * (1000 / Math.max(1, t - vLast)) : 1000 / Math.max(1, t - vLast); vLast = t;
+  const smp = [t, x, y, z]; vbuf.push(smp); while (vbuf.length && t - vbuf[0][0] > 4000) vbuf.shift();
+  if (vSink) vSink.push(smp);
+}
+async function vibStart() {
+  if (vibOn) return true;
+  if (typeof DeviceMotionEvent === "undefined") { toast("이 기기에는 진동(가속도) 센서가 없습니다 — 휴대폰에서 열어 주세요", 4000); return false; }
+  try { if (typeof DeviceMotionEvent.requestPermission === "function") { const r = await DeviceMotionEvent.requestPermission(); if (r !== "granted") { toast("진동 센서 사용을 허락해 주세요 (설정 → Safari → 동작 및 방향 접근)", 5000); return false; } } } catch (e) { toast("진동 센서를 켜지 못했습니다: " + e.message, 4000); return false; }
+  vbuf = []; vFs = 0; vLast = 0; gAvg = null; window.addEventListener("devicemotion", onMotion);
+  await new Promise(r => setTimeout(r, 1500));
+  if (!vbuf.length) { window.removeEventListener("devicemotion", onMotion); toast("진동 센서 값이 들어오지 않습니다 — 이 기기(PC)에는 센서가 없을 수 있습니다", 4500); return false; }
+  vibOn = true; $("vibWin").hidden = false; $("bVib").innerHTML = "<i>📳</i>진동 OFF"; $("bVib").classList.add("on"); vibLabel(); requestAnimationFrame(vdraw); return true;
+}
+function vibStop() { window.removeEventListener("devicemotion", onMotion); vibOn = false; $("vibWin").hidden = true; $("bVib").innerHTML = "<i>📳</i>진동 ON"; $("bVib").classList.remove("on"); vibLabel(); }
+$("bVib").onclick = () => (vibOn ? vibStop() : vibStart());
+const vibLabel = () => { $("stVib").textContent = vibOn ? `진동: 켜짐 (${Math.round(vFs)}Hz 샘플)${VBG ? ` · 배경 ${VBG.rms.toFixed(3)} m/s²` : ""}` : "진동: 꺼짐"; $("vibFs").textContent = vibOn ? `센서 ${Math.round(vFs)}회/초 → ${Math.floor(vFs / 2)}Hz까지` : ""; };
+function vibAnalyze(smp) {                                  // 진동 크기(RMS, 3축 합) + 가장 뚜렷한 주파수 (DFT 0.5Hz~ fs/2)
+  if (smp.length < 20) return null;
+  const T0 = smp[0][0], T1 = smp[smp.length - 1][0], dur = (T1 - T0) / 1000, fs = (smp.length - 1) / dur;
+  const ax = [1, 2, 3].map(k => { const m = smp.reduce((s, r) => s + r[k], 0) / smp.length; return smp.map(r => r[k] - m); });
+  const rms = Math.sqrt(smp.reduce((s, _, i) => s + ax[0][i] ** 2 + ax[1][i] ** 2 + ax[2][i] ** 2, 0) / smp.length);
+  const N = smp.length, ts = smp.map(r => (r[0] - T0) / 1000), fmax = Math.min(30, fs / 2 - 0.5), df = Math.max(0.1, 1 / dur / 2), spec = [];
+  for (let f = 0.5; f <= fmax; f += df) {
+    let pw = 0; for (const a of ax) { let re = 0, im = 0; for (let i = 0; i < N; i++) { const w = 2 * Math.PI * f * ts[i]; re += a[i] * Math.cos(w); im -= a[i] * Math.sin(w); } pw += re * re + im * im; }
+    spec.push([f, Math.sqrt(pw) * 2 / N]);
+  }
+  const best = spec.reduce((b, x) => (x[1] > b[1] ? x : b), [0, 0]), mean = spec.reduce((s, x) => s + x[1], 0) / (spec.length || 1);
+  return { rms: Math.round(rms * 10000) / 10000, f: Math.round(best[0] * 10) / 10, amp: Math.round(best[1] * 10000) / 10000, sharp: Math.round(best[1] / (mean || 1e-9) * 10) / 10, fs: Math.round(fs) };
+}
+function vibJudge(v) {
+  if (!v) return ["", "—"];
+  const ratio = VBG ? v.rms / Math.max(VBG.rms, 0.002) : null;
+  if (ratio == null) return v.rms > 0.3 ? ["warn", "⚠ 흔들림 (배경 없음)"] : ["ok", "✅ (배경 없음)"];
+  if (ratio < 1.5) return ["ok", "✅ 조용"];
+  if (ratio >= 3 && v.sharp >= 3) return ["hunt", `🟠 헌팅 의심 ${v.f}Hz`];
+  return ["warn", `⚠ 흔들림 ×${ratio.toFixed(1)}`];
+}
+const vcv = $("vcv"), vg = vcv.getContext("2d");
+function vdraw() {
+  if (!vibOn) return;
+  vg.fillStyle = "#000"; vg.fillRect(0, 0, vcv.width, vcv.height);
+  vg.strokeStyle = "#1f3a1f"; for (let k = 1; k < 4; k++) { vg.beginPath(); vg.moveTo(0, vcv.height * k / 4); vg.lineTo(vcv.width, vcv.height * k / 4); vg.stroke(); }
+  const now = performance.now(), sc = Math.max(0.05, ...vbuf.map(r => Math.max(Math.abs(r[1]), Math.abs(r[2]), Math.abs(r[3])))) * 1.1;
+  ["#ff7070", "#7dff7d", "#7db8ff"].forEach((c, k) => { vg.strokeStyle = c; vg.lineWidth = 2; vg.beginPath(); vbuf.forEach((r, i) => { const x = vcv.width - (now - r[0]) / 4000 * vcv.width, y = vcv.height / 2 - r[k + 1] / sc * vcv.height / 2.2; i ? vg.lineTo(x, y) : vg.moveTo(x, y); }); vg.stroke(); });
+  vg.fillStyle = "#6c8f6c"; vg.font = "20px Consolas, monospace"; vg.fillText(`±${sc.toFixed(2)} m/s² · 4초`, 8, 22);
+  if (!vdraw.t || now - vdraw.t > 500) {                    // 0.5초마다 숫자 갱신 (최근 2초)
+    vdraw.t = now; const v = vibAnalyze(vbuf.filter(r => now - r[0] < 2000));
+    if (v) { const j = vibJudge(v); $("vRms").textContent = v.rms.toFixed(3) + " m/s²"; $("vRat").textContent = VBG ? "×" + (v.rms / Math.max(VBG.rms, 0.002)).toFixed(1) : "—"; $("vF").textContent = v.f + " Hz"; $("vAl").innerHTML = j[0] === "hunt" ? `<span class="alarm">${j[1]}</span>` : j[0] === "warn" ? `<span class="w">${j[1]}</span>` : ""; }
+    vibLabel();
+  }
+  requestAnimationFrame(vdraw);
+}
+
 // ================= 평균 스펙트럼 재기 (배경 / 측정) =================
 function measure(sec, onTick) {                           // sec 초 동안 파워 평균 스펙트럼 + PCM
   return new Promise(res => {
-    const acc = new Float64Array(bins), peakHold = new Float32Array(bins).fill(-200), t0 = performance.now(); let n = 0; pcmSink = [];
+    const acc = new Float64Array(bins), peakHold = new Float32Array(bins).fill(-200), t0 = performance.now(); let n = 0; pcmSink = []; vSink = vibOn ? [] : null;
     const iv = setInterval(() => {
       an.getFloatFrequencyData(fbuf); for (let i = 0; i < bins; i++) { acc[i] += 10 ** (fbuf[i] / 10); if (fbuf[i] > peakHold[i]) peakHold[i] = fbuf[i]; } n++;
       const el = (performance.now() - t0) / 1000; onTick && onTick(Math.min(1, el / sec), sec - el);
-      if (el >= sec) { clearInterval(iv); const spec = new Float32Array(bins); for (let i = 0; i < bins; i++) spec[i] = 10 * Math.log10(acc[i] / n + 1e-20); let pcm = pcmSink; pcmSink = null; const want = Math.round(sec * ctx.sampleRate); let have = pcm.reduce((t, c) => t + c.length, 0); while (pcm.length > 1 && have - pcm[0].length >= want) { have -= pcm[0].length; pcm.shift(); } res({ spec, peakHold, pcm }); }   // 녹음 길이는 정한 초만큼
+      if (el >= sec) { clearInterval(iv); const spec = new Float32Array(bins); for (let i = 0; i < bins; i++) spec[i] = 10 * Math.log10(acc[i] / n + 1e-20); let pcm = pcmSink; pcmSink = null; const want = Math.round(sec * ctx.sampleRate); let have = pcm.reduce((t, c) => t + c.length, 0); while (pcm.length > 1 && have - pcm[0].length >= want) { have -= pcm[0].length; pcm.shift(); } const vib = vSink; vSink = null; res({ spec, peakHold, pcm, vib }); }   // 녹음 길이는 정한 초만큼
     }, 50);
   });
 }
@@ -289,11 +360,12 @@ let busy = false;
 const prog = (p, left, label) => { $("recProg").style.width = Math.round(p * 100) + "%"; $("recLeft").textContent = left > 0 ? Math.ceil(left) + "초" : ""; if (label) $("recState").textContent = label; };
 $("bBg").onclick = async () => {
   if (busy) return; if (!(await micOn())) return;
-  if (!confirm("모터를 멈춘 상태인가요?\n\n지금부터 5초 동안 주변 소음(팬·다른 설비)을 잽니다.")) return;
-  busy = true; prog(0, 5, "🔇 배경 소음 측정 중…");
+  if (!confirm(`모터를 멈춘 상태인가요?\n\n지금부터 5초 동안 주변 소음(팬·다른 설비)${vibOn ? "과 바닥 진동" : ""}을 잽니다.`)) return;
+  busy = true; prog(0, 5, `🔇 배경 ${vibOn ? "소음·진동" : "소음"} 측정 중…`);
   const r = await measure(5, (p, l) => prog(p, l));
   BG = { spec: [...r.spec].map(x => Math.round(x * 10) / 10), lv: bandLevel(r.spec), binHz, at: Date.now() }; BG.spec = Float32Array.from(BG.spec);
-  ls.set("bg", { ...BG, spec: [...BG.spec] }); busy = false; prog(1, 0, "배경 소음 저장됨"); bgLabel(); toast(`배경 소음 ${BG.lv.toFixed(1)} dB 저장 — 이제 운전하면서 ⏺ 측정 기록`);
+  if (r.vib && r.vib.length > 20) { const v = vibAnalyze(r.vib); VBG = { rms: v.rms, f: v.f, at: Date.now() }; ls.set("vbg", VBG); }
+  ls.set("bg", { ...BG, spec: [...BG.spec] }); busy = false; prog(1, 0, "배경 소음 저장됨"); bgLabel(); toast(`배경 소음 ${BG.lv.toFixed(1)} dB${VBG && vibOn ? ` · 진동 ${VBG.rms.toFixed(3)} m/s²` : ""} 저장 — 이제 운전하면서 ⏺ 측정 기록`);
 };
 if (BG) BG.spec = Float32Array.from(BG.spec);
 
@@ -317,8 +389,9 @@ $("bRec").onclick = async () => {
   const top = [], used = new Set();
   for (let t = 0; t < 3; t++) { let b = null; for (let i = Math.max(2, f2i(30)); i <= Math.min(bins - 3, f2i(FMAX)); i++) { if ([...used].some(u => Math.abs(u - i) < 6)) continue; if (r.spec[i] < r.spec[i - 1] || r.spec[i] < r.spec[i + 1]) continue; const e = r.spec[i] - (BG ? BG.spec[i] : -100); if (!b || e > b.e) b = { i, e }; } if (!b) break; used.add(b.i); top.push({ f: Math.round(i2f(b.i)), ex: Math.round(b.e * 10) / 10 }); }
   const take = { id: "t" + Date.now(), at: Date.now(), name, params, named, memo: $("memo").value, sec, lv: Math.round(lv * 10) / 10, ex: Math.round(ex * 10) / 10,
+    vib: r.vib && r.vib.length > 20 ? (() => { const v = vibAnalyze(r.vib); v.ratio = VBG ? Math.round(v.rms / Math.max(VBG.rms, 0.002) * 10) / 10 : null; v.j = vibJudge(v); v.raw = r.vib.map(q => [Math.round(q[0] - r.vib[0][0]), +q[1].toFixed(4), +q[2].toFixed(4), +q[3].toFixed(4)]); return v; })() : null,
     pk: pk ? { f: Math.round(pk.f), ex: Math.round(pk.ex * 10) / 10, prom: Math.round(pk.prom * 10) / 10 } : null, top, j: [jc, jt], spec: [...r.spec].map(x => Math.round(x * 10) / 10), sr: ctx.sampleRate, binHz, wav: toWav(r.pcm, ctx.sampleRate) };
-  await putT(take); busy = false; $("bRec").disabled = false; prog(1, 0, `저장: ${name} → ${jt}`); toast(`📝 ${name} — ${jt}`); renderRes();
+  await putT(take); busy = false; $("bRec").disabled = false; prog(1, 0, `저장: ${name} → ${jt}${take.vib ? ` · 진동 ${take.vib.j[1]}` : ""}`); toast(`📝 ${name} — ${jt}${take.vib ? ` · 📳 ${take.vib.j[1]}` : ""}`); renderRes();
 };
 
 // ================= 결과 표 · 추천 =================
@@ -328,24 +401,28 @@ async function renderRes() {
   $("resCount").textContent = list.length ? `${list.length}건` : "";
   list.forEach((t, k) => {
     const tr = document.createElement("tr"), d = new Date(t.at);
-    tr.innerHTML = `<td>${k + 1}</td><td>${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}</td><td style="font-family:Consolas,monospace;color:#1d4f91" title="${t.memo || ""}">${t.name}</td><td>${t.lv.toFixed(1)} dB (${sgn(t.ex)})</td><td>${t.pk ? fmtF(t.pk.f) : "—"}</td><td>${t.pk ? sgn(t.pk.ex) + " dB" : "—"}</td><td class="j ${t.j[0]}">${t.j[1]}</td>
-      <td><button class="p">▶</button> <button class="s" title="이 측정의 스펙트럼을 그래프에 겹쳐 보기">📈</button> <button class="w" title="WAV 내려받기">⬇</button> <button class="x" title="지우기">✕</button></td>`;
+    tr.innerHTML = `<td>${k + 1}</td><td>${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}</td><td style="font-family:Consolas,monospace;color:#1d4f91" title="${t.memo || ""}">${t.name}</td><td>${t.lv.toFixed(1)} dB (${sgn(t.ex)})</td><td>${t.pk ? fmtF(t.pk.f) : "—"}</td><td>${t.pk ? sgn(t.pk.ex) + " dB" : "—"}</td><td class="j ${t.j[0]}">${t.j[1]}</td><td class="vibc">${t.vib ? `<b>${t.vib.rms.toFixed(3)}</b> m/s²${t.vib.ratio != null ? ` (×${t.vib.ratio})` : ""} · ${t.vib.f}Hz` : "—"}</td><td class="j ${t.vib ? t.vib.j[0] : ""}">${t.vib ? t.vib.j[1] : "—"}</td>
+      <td><button class="p">▶</button> <button class="s" title="이 측정의 스펙트럼을 그래프에 겹쳐 보기">📈</button> <button class="w" title="WAV 내려받기">⬇</button>${t.vib ? ' <button class="v" title="진동 원본 CSV">📳</button>' : ""} <button class="x" title="지우기">✕</button></td>`;
     tr.querySelector(".p").onclick = e => { const b = e.currentTarget; if (playing) { playing.pause(); playing.btn.textContent = "▶"; if (playing.btn === b) { playing = null; return; } } const a = new Audio(URL.createObjectURL(t.wav)); a.btn = b; playing = a; b.textContent = "■"; a.onended = () => { b.textContent = "▶"; playing = null; }; a.play().catch(() => {}); };
     tr.querySelector(".s").onclick = () => showSpec(t);
     tr.querySelector(".w").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(t.wav); a.download = `ServoEar_${t.name.replace(/[^\w=.\-가-힣]+/g, "_")}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.wav`; document.body.appendChild(a); a.click(); a.remove(); };
+    if (tr.querySelector(".v")) tr.querySelector(".v").onclick = () => { const csv = "\ufeffms,x,y,z\r\n" + t.vib.raw.map(r => r.join(",")).join("\r\n"), a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = `ServoEar_진동_${t.name.replace(/[^\w=.\-가-힣]+/g, "_")}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.csv`; document.body.appendChild(a); a.click(); a.remove(); };
     tr.querySelector(".x").onclick = async () => { if (!confirm(`'${t.name}' 측정을 지울까요?`)) return; await delT(t.id); renderRes(); };
     tb.appendChild(tr);
   });
-  if (!list.length) tb.innerHTML = '<tr><td colspan="8" style="color:var(--dim);padding:10px">아직 측정이 없습니다. 🎙 마이크 ON → 🔇 배경 소음 → 운전하면서 ⏺ 측정 기록</td></tr>';
+  if (!list.length) tb.innerHTML = '<tr><td colspan="10" style="color:var(--dim);padding:10px">아직 측정이 없습니다. 🎙 마이크 ON → 🔇 배경 소음 → 운전하면서 ⏺ 측정 기록</td></tr>';
   $("advice").innerHTML = advise(list);
 }
 function advise(list) {                                   // 응답성(PA09) 단계별로 어디까지 조용했는지 · 노치 후보
   if (!list.length) return "";
   const out = [], byR = list.filter(t => t.params?.PA09).map(t => ({ r: +t.params.PA09, t })).sort((a, b) => a.r - b.r);
-  const firstBad = byR.find(x => x.t.j[0] === "bad" || x.t.j[0] === "hunt");
-  const okBefore = byR.filter(x => (x.t.j[0] === "ok" || x.t.j[0] === "warn") && (!firstBad || x.r < firstBad.r));
-  if (okBefore.length) out.push(`✅ <b>응답성(PA09) ${okBefore[okBefore.length - 1].r}까지는 안정</b>${firstBad ? `, <b>${firstBad.r}</b>부터 ${firstBad.t.j[1]}` : " (공진·헌팅 없음)"}`);
-  else if (firstBad) out.push(`🔴 가장 낮은 응답성 ${firstBad.r}에서도 ${firstBad.t.j[1]} — 응답성을 더 낮추거나 기계 쪽(체결·풀림)도 확인해 보세요.`);
+  const badOf = t => (t.j[0] === "bad" || t.j[0] === "hunt" ? t.j[1] : "") || (t.vib && t.vib.j[0] === "hunt" ? "📳 " + t.vib.j[1] : "");   // 소리 또는 진동이 나쁘면
+  const firstBad = byR.find(x => badOf(x.t));
+  const okBefore = byR.filter(x => !badOf(x.t) && (!firstBad || x.r < firstBad.r));
+  if (okBefore.length) out.push(`✅ <b>응답성(PA09) ${okBefore[okBefore.length - 1].r}까지는 안정</b>${firstBad ? `, <b>${firstBad.r}</b>부터 ${badOf(firstBad.t)}` : " (공진·헌팅 없음)"}`);
+  else if (firstBad) out.push(`🔴 가장 낮은 응답성 ${firstBad.r}에서도 ${badOf(firstBad.t)} — 응답성을 더 낮추거나 기계 쪽(체결·풀림)도 확인해 보세요.`);
+  const vq = list.filter(t => t.vib && t.vib.j[0] === "hunt" && !(t.j[0] === "bad" || t.j[0] === "hunt"));
+  if (vq.length) out.push(`📳 소리는 괜찮은데 <b>진동이 ${vq[0].vib.f}Hz로 ${vq[0].vib.ratio ?? "?"}배</b> 커진 측정이 있습니다 (${vq.map(t => t.name.split("_")[0]).join(", ")}) — 저주파 헌팅·흔들림: 응답성을 한 단계 낮추거나 PB06(관성비)·기계 고정 상태를 확인해 보세요.`);
   const res = list.filter(t => t.j[0] === "bad" && t.pk && t.pk.f >= 100);
   if (res.length) {
     const cl = []; res.forEach(t => { const c = cl.find(c => Math.abs(c.f - t.pk.f) / c.f < 0.08); c ? (c.n++, c.f = (c.f * (c.n - 1) + t.pk.f) / c.n, c.ex = Math.max(c.ex, t.pk.ex)) : cl.push({ f: t.pk.f, n: 1, ex: t.pk.ex }); });
@@ -371,8 +448,8 @@ function showSpec(t) {                                    // 저장된 측정 �
 }
 $("bCsv").onclick = async () => {
   const list = (await allT()).sort((a, b) => a.at - b.at); if (!list.length) { toast("저장할 결과가 없습니다"); return; }
-  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`, head = ["#", "시각", "녹음 이름", ...P.map(p => `${p.no} ${p.ab}`), "길이(초)", "전체 dB", "배경 대비 dB", "피크 Hz", "피크 배경 대비 dB", "봉우리 2", "봉우리 3", "판정", "메모"];
-  const rows = list.map((t, k) => [k + 1, new Date(t.at).toLocaleString("ko-KR"), t.name, ...P.map(p => t.params?.[p.no] ?? ""), t.sec, t.lv, t.ex, t.pk?.f ?? "", t.pk?.ex ?? "", t.top?.[1] ? `${t.top[1].f}Hz ${sgn(t.top[1].ex)}` : "", t.top?.[2] ? `${t.top[2].f}Hz ${sgn(t.top[2].ex)}` : "", t.j[1], t.memo || ""]);
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`, head = ["#", "시각", "녹음 이름", ...P.map(p => `${p.no} ${p.ab}`), "길이(초)", "전체 dB", "배경 대비 dB", "피크 Hz", "피크 배경 대비 dB", "봉우리 2", "봉우리 3", "판정", "진동 RMS m/s²", "진동 배경 대비(배)", "진동 Hz", "진동 판정", "메모"];
+  const rows = list.map((t, k) => [k + 1, new Date(t.at).toLocaleString("ko-KR"), t.name, ...P.map(p => t.params?.[p.no] ?? ""), t.sec, t.lv, t.ex, t.pk?.f ?? "", t.pk?.ex ?? "", t.top?.[1] ? `${t.top[1].f}Hz ${sgn(t.top[1].ex)}` : "", t.top?.[2] ? `${t.top[2].f}Hz ${sgn(t.top[2].ex)}` : "", t.j[1], t.vib?.rms ?? "", t.vib?.ratio ?? "", t.vib?.f ?? "", t.vib?.j[1] ?? "", t.memo || ""]);
   const csv = "﻿" + [head, ...rows].map(r => r.map(q).join(",")).join("\r\n"), d = new Date(), a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = `ServoEar_결과_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.csv`; document.body.appendChild(a); a.click(); a.remove();
   toast(`📊 ${list.length}건을 CSV로 저장했습니다 (다운로드 폴더)`);
