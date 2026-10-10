@@ -228,11 +228,17 @@ const FMIN = 20, FMAX = 8000, FFT = 8192;
 let ctx = null, stream = null, an = null, proc = null, fbuf = null, bins = 0, binHz = 0, holdArr = null;
 let BG = ls.get("bg", null);                              // 배경 소음 스펙트럼 (dB 배열) + 그때 분해능
 let pcmSink = null;                                       // 녹음 중이면 PCM 모으기
+function wakeAudio() { try { if (ctx && ctx.state !== "running") ctx.resume().catch(() => {}); } catch (e) {} }   // 아이폰: 권한 창·전화·알림 뒤 '중단'된 소리 장치 깨우기
+["touchend", "click"].forEach(ev => document.addEventListener(ev, wakeAudio, { capture: true, passive: true }));
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wakeAudio(); });
 async function micOn() {
-  if (stream) return true;
+  if (stream) { wakeAudio(); return true; }
+  try { if (navigator.audioSession) navigator.audioSession.type = "play-and-record"; } catch (e) {}
   try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } }); }
   catch (e) { toast(e.name === "NotAllowedError" ? "마이크 사용을 허락해 주세요" : "마이크를 열지 못했습니다: " + e.message, 5000); return false; }
-  ctx = new (window.AudioContext || window.webkitAudioContext)(); if (ctx.state !== "running") await ctx.resume();
+  ctx = new (window.AudioContext || window.webkitAudioContext)(); ctx.onstatechange = () => { if (ctx && ctx.state !== "running") setTimeout(wakeAudio, 300); };
+  if (ctx.state !== "running") await Promise.race([ctx.resume(), new Promise(r => setTimeout(r, 1500))]);
+  stream.getAudioTracks().forEach(t => { t.onended = () => { toast("⚠ 마이크가 끊겼습니다 — 🎙 마이크를 껐다 다시 켜 주세요", 6000); micOff(); }; t.onmute = () => toast("⚠ 마이크 입력이 멈췄습니다 (다른 앱이 마이크를 쓰는 중일 수 있음)", 5000); });
   const src = ctx.createMediaStreamSource(stream);
   an = ctx.createAnalyser(); an.fftSize = FFT; an.smoothingTimeConstant = 0.6; an.minDecibels = -120; an.maxDecibels = 0;
   src.connect(an);
@@ -293,10 +299,12 @@ function line(arr, color, w) {
   for (let i = Math.max(1, f2i(FMIN)); i <= Math.min(bins - 1, f2i(FMAX)); i++) { const x = fx(i2f(i)), y = dy(arr[i]); st ? g.lineTo(x, y) : (g.moveTo(x, y), st = true); }
   g.stroke();
 }
-let live = null, alarmCnt = 0;
+let live = null, alarmCnt = 0, micDead = false;
 function draw() {
   if (!an) { grid(); return; }
   an.getFloatFrequencyData(fbuf); live = fbuf;
+  { let h = 0; for (let i = 1; i < bins; i += 7) h = (h * 31 + Math.round(fbuf[i] * 10)) | 0; const now = performance.now();   // 마이크 입력이 멈췄는지 (값이 그대로면)
+    if (h !== draw.h) { draw.h = h; draw.ht = now; } micDead = now - (draw.ht || now) > 1500; if (micDead) wakeAudio(); }
   if ($("hold").checked) { if (!holdArr) holdArr = new Float32Array(fbuf); else for (let i = 0; i < bins; i++) holdArr[i] = Math.max(holdArr[i] - 0.05, fbuf[i]); } else holdArr = null;
   grid();
   if (BG) line(BG.spec, "#4a6fa5", 2);
@@ -307,6 +315,7 @@ function draw() {
   $("rPk").textContent = pk ? fmtF(pk.f) : "— Hz"; $("rEx").textContent = pk && BG ? sgn(pk.ex) + " dB" : "—"; $("rLv").textContent = lv.toFixed(1) + " dB" + (BG ? ` (${sgn(lv - BG.lv)})` : "");
   const j = BG && pk ? judge(lv - BG.lv, pk) : null;
   alarmCnt = j && (j[0] === "bad" || j[0] === "hunt") ? alarmCnt + 1 : 0;
+  if (micDead) { $("rAl").innerHTML = `<span class="alarm">⚠ 마이크 입력 없음 (${ctx ? ctx.state : "-"}) — 화면을 한 번 누르거나 🎙 를 껐다 켜 주세요</span>`; requestAnimationFrame(draw); return; }
   $("rAl").innerHTML = alarmCnt > 8 ? `<span class="alarm">${j[1]}</span>` : j && j[0] === "warn" ? '<span class="w">⚠ 소리 커짐</span>' : "";
   requestAnimationFrame(draw);
 }
@@ -377,11 +386,13 @@ function vdraw() {
 // ================= 평균 스펙트럼 재기 (배경 / 측정) =================
 function measure(sec, onTick) {                           // sec 초 동안 파워 평균 스펙트럼 + PCM
   return new Promise(res => {
-    const acc = new Float64Array(bins), peakHold = new Float32Array(bins).fill(-200), t0 = performance.now(); let n = 0; pcmSink = []; vSink = vibOn ? [] : null;
+    wakeAudio();
+    const acc = new Float64Array(bins), peakHold = new Float32Array(bins).fill(-200), t0 = performance.now(); let n = 0, changes = 0, lastH = null; pcmSink = []; vSink = vibOn ? [] : null;
     const iv = setInterval(() => {
       an.getFloatFrequencyData(fbuf); for (let i = 0; i < bins; i++) { acc[i] += 10 ** (fbuf[i] / 10); if (fbuf[i] > peakHold[i]) peakHold[i] = fbuf[i]; } n++;
+      let h = 0; for (let i = 1; i < bins; i += 7) h = (h * 31 + Math.round(fbuf[i] * 10)) | 0; if (lastH !== null && h !== lastH) changes++; lastH = h;
       const el = (performance.now() - t0) / 1000; onTick && onTick(Math.min(1, el / sec), sec - el);
-      if (el >= sec) { clearInterval(iv); const spec = new Float32Array(bins); for (let i = 0; i < bins; i++) spec[i] = 10 * Math.log10(acc[i] / n + 1e-20); let pcm = pcmSink; pcmSink = null; const want = Math.round(sec * ctx.sampleRate); let have = pcm.reduce((t, c) => t + c.length, 0); while (pcm.length > 1 && have - pcm[0].length >= want) { have -= pcm[0].length; pcm.shift(); } const vib = vSink; vSink = null; res({ spec, peakHold, pcm, vib }); }   // 녹음 길이는 정한 초만큼
+      if (el >= sec) { clearInterval(iv); const spec = new Float32Array(bins); for (let i = 0; i < bins; i++) spec[i] = 10 * Math.log10(acc[i] / n + 1e-20); let pcm = pcmSink; pcmSink = null; const want = Math.round(sec * ctx.sampleRate); let have = pcm.reduce((t, c) => t + c.length, 0); while (pcm.length > 1 && have - pcm[0].length >= want) { have -= pcm[0].length; pcm.shift(); } const vib = vSink; vSink = null; res({ spec, peakHold, pcm, vib, dead: changes < Math.max(3, n * 0.05) }); }   // 녹음 길이는 정한 초만큼
     }, 50);
   });
 }
@@ -391,9 +402,12 @@ const prog = (p, left, label) => { $("recProg").style.width = Math.round(p * 100
 $("mRec").onclick = () => $("bRec").click();
 $("bBg").onclick = async () => {
   if (busy) return; if (!(await micOn())) return;
-  if (!confirm(`모터를 멈춘 상태인가요?\n\n지금부터 5초 동안 주변 소음(팬·다른 설비)${vibOn ? "과 바닥 진동" : ""}을 잽니다.`)) return;
+  if (!confirm(`모터를 멈춘 상태인가요?\n\n지금부터 5초 동안 주변 소음(팬·다른 설비)${vibOn ? "과 바닥 진동" : ""}을 잽니다.${vibOn ? "\n\n📳 휴대폰을 기계에 고정하고 손을 뗀 상태에서 확인을 누르세요 (3초 뒤 시작)." : ""}`)) return;
+  if (vibOn) { busy = true; for (let k = 3; k > 0; k--) { prog(0, 0, `손을 떼 주세요… ${k}`); await new Promise(r => setTimeout(r, 1000)); } busy = false; }
   busy = true; prog(0, 5, `🔇 배경 ${vibOn ? "소음·진동" : "소음"} 측정 중…`);
   const r = await measure(5, (p, l) => prog(p, l));
+  if (r.dead) { busy = false; prog(0, 0, "⚠ 마이크 입력 없음 — 배경을 저장하지 않았습니다"); toast("⚠ 마이크 소리가 들어오지 않습니다. 화면을 한 번 누르거나 🎙 마이크를 껐다 켠 뒤 다시 재 주세요", 6000);
+    if (r.vib && r.vib.length > 20) { const v = vibAnalyze(r.vib); VBG = { rms: v.rms, f: v.f, at: Date.now() }; ls.set("vbg", VBG); vibLabel(); } return; }
   BG = { spec: [...r.spec].map(x => Math.round(x * 10) / 10), lv: bandLevel(r.spec), binHz, at: Date.now() }; BG.spec = Float32Array.from(BG.spec);
   if (r.vib && r.vib.length > 20) { const v = vibAnalyze(r.vib); VBG = { rms: v.rms, f: v.f, at: Date.now() }; ls.set("vbg", VBG); }
   ls.set("bg", { ...BG, spec: [...BG.spec] }); busy = false; prog(1, 0, "배경 소음 저장됨"); bgLabel(); toast(`배경 소음 ${BG.lv.toFixed(1)} dB${VBG && vibOn ? ` · 진동 ${VBG.rms.toFixed(3)} m/s²` : ""} 저장 — 이제 운전하면서 ⏺ 측정 기록`);
@@ -415,7 +429,8 @@ $("bRec").onclick = async () => {
   const sec = +$("recLen").value, name = recName(), params = { ...V }, named = [...NAMED];
   busy = true; $("bRec").disabled = true; prog(0, sec, `⏺ 기록 중: ${name}`);
   const r = await measure(sec, (p, l) => prog(p, l));
-  const lv = bandLevel(r.spec), pk = peakOf(r.spec, BG && BG.spec), ex = BG ? lv - BG.lv : 0, [jc, jt] = BG ? judge(ex, pk) : ["warn", "— (배경 없음)"];
+  const lv = bandLevel(r.spec), pk = r.dead ? null : peakOf(r.spec, BG && BG.spec), ex = BG ? lv - BG.lv : 0, [jc, jt] = r.dead ? ["", "⚠ 마이크 입력 없음"] : BG ? judge(ex, pk) : ["warn", "— (배경 없음)"];
+  if (r.dead) toast("⚠ 이번 측정은 마이크 소리가 들어오지 않았습니다 — 소리 판정은 빼고 진동만 저장합니다", 6000);
   // 봉우리 3개 (노치 후보 참고용)
   const top = [], used = new Set();
   for (let t = 0; t < 3; t++) { let b = null; for (let i = Math.max(2, f2i(30)); i <= Math.min(bins - 3, f2i(FMAX)); i++) { if ([...used].some(u => Math.abs(u - i) < 6)) continue; if (r.spec[i] < r.spec[i - 1] || r.spec[i] < r.spec[i + 1]) continue; const e = r.spec[i] - (BG ? BG.spec[i] : -100); if (!b || e > b.e) b = { i, e }; } if (!b) break; used.add(b.i); top.push({ f: Math.round(i2f(b.i)), ex: Math.round(b.e * 10) / 10 }); }
