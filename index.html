@@ -460,8 +460,8 @@ async function renderRes() {
       <td><button class="p">▶</button> <button class="s" title="이 측정의 스펙트럼을 그래프에 겹쳐 보기">📈</button> <button class="w" title="WAV 내려받기">⬇</button>${t.vib ? ' <button class="v" title="진동 원본 CSV">📳</button>' : ""} <button class="x" title="지우기">✕</button></td>`;
     tr.querySelector(".p").onclick = e => { const b = e.currentTarget; if (playing) { playing.pause(); playing.btn.textContent = "▶"; if (playing.btn === b) { playing = null; return; } } const a = new Audio(URL.createObjectURL(t.wav)); a.btn = b; playing = a; b.textContent = "■"; a.onended = () => { b.textContent = "▶"; playing = null; }; a.play().catch(() => {}); };
     tr.querySelector(".s").onclick = () => showSpec(t);
-    tr.querySelector(".w").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(t.wav); a.download = `ServoEar_${t.name.replace(/[^\w=.\-가-힣]+/g, "_")}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.wav`; document.body.appendChild(a); a.click(); a.remove(); };
-    if (tr.querySelector(".v")) tr.querySelector(".v").onclick = () => { const csv = "\ufeffms,x,y,z\r\n" + t.vib.raw.map(r => r.join(",")).join("\r\n"), a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = `ServoEar_진동_${t.name.replace(/[^\w=.\-가-힣]+/g, "_")}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.csv`; document.body.appendChild(a); a.click(); a.remove(); };
+    tr.querySelector(".w").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(t.wav); a.download = `ServoEar_${t.name.replace(/[^\w=.\-]+/g, "_")}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.wav`; document.body.appendChild(a); a.click(); a.remove(); };
+    if (tr.querySelector(".v")) tr.querySelector(".v").onclick = () => { const csv = "\ufeffms,x,y,z\r\n" + t.vib.raw.map(r => r.join(",")).join("\r\n"), a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = `ServoEar_Vib_${t.name.replace(/[^\w=.\-]+/g, "_")}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.csv`; document.body.appendChild(a); a.click(); a.remove(); };
     tr.querySelector(".x").onclick = async () => { if (!confirm(`'${t.name}' 측정을 지울까요?`)) return; await delT(t.id); renderRes(); };
     tb.appendChild(tr);
   });
@@ -507,11 +507,11 @@ function makeCsv(list) {
   return new Blob(["\ufeff" + [head, ...rows].map(r => r.map(q).join(",")).join("\r\n")], { type: "text/csv" });
 }
 const stamp = () => { const d = new Date(); return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`; };
-const safe = n => n.replace(/[^\w=.\-가-힣]+/g, "_");
+const safe = n => n.replace(/[^\w=.\-]+/g, "_");
 $("bCsv").onclick = async () => {
   const list = (await allT()).sort((a, b) => a.at - b.at); if (!list.length) { toast("저장할 결과가 없습니다"); return; }
   const d = new Date(), a = document.createElement("a");
-  a.href = URL.createObjectURL(makeCsv(list)); a.download = `ServoEar_결과_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  a.href = URL.createObjectURL(makeCsv(list)); a.download = `ServoEar_Result_${stamp()}.csv`; document.body.appendChild(a); a.click(); a.remove();
   toast(`📊 ${list.length}건을 CSV로 저장했습니다 (다운로드 폴더)`);
 };
 // ================= 📤 공유 (휴대폰 공유 창: 아이폰 AirDrop·카톡·OneDrive·메일 / 갤럭시 Quick Share·블루투스·카톡) =================
@@ -528,10 +528,10 @@ $("bShare").onclick = async () => {
 $("shNo").onclick = () => $("shareDlg").close();
 $("shGo").onclick = async () => {
   const what = document.querySelector("input[name=shw]:checked").value, list = (await allT()).sort((a, b) => a.at - b.at), st = stamp();
-  const files = [new File([makeCsv(list)], `ServoEar_결과_${st}.csv`, { type: "text/csv" })];
+  const files = [new File([makeCsv(list)], `ServoEar_Result_${st}.csv`, { type: "text/csv" })];
   list.forEach((t, k) => {
     const hhmmss = (d => `${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`)(new Date(t.at)), base = `${String(k + 1).padStart(2, "0")}_${safe(t.name)}_${hhmmss}`;
-    if ((what === "vib" || what === "all") && t.vib?.raw) files.push(new File(["\ufeffms,x,y,z\r\n" + t.vib.raw.map(r => r.join(",")).join("\r\n")], `ServoEar_진동_${base}.csv`, { type: "text/csv" }));
+    if ((what === "vib" || what === "all") && t.vib?.raw) files.push(new File(["\ufeffms,x,y,z\r\n" + t.vib.raw.map(r => r.join(",")).join("\r\n")], `ServoEar_Vib_${base}.csv`, { type: "text/csv" }));
     if (what === "all" && t.wav) files.push(new File([t.wav], `ServoEar_${base}.wav`, { type: "audio/wav" }));
   });
   $("shareDlg").close();
