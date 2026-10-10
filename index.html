@@ -99,6 +99,7 @@
     <button class="tb rec" id="bRec" title="지금 파라미터 값으로 이름을 붙여 녹음·분석"><i>⏺</i>측정 기록</button>
     <label style="font-size:12px">길이 <select id="recLen"><option value="5">5초</option><option value="10" selected>10초</option><option value="20">20초</option><option value="30">30초</option></select></label>
     <div class="sep"></div>
+    <button class="tb" id="bShare" title="휴대폰 공유 창으로 보내기 (카톡·AirDrop·Quick Share·블루투스·OneDrive·메일)"><i>📤</i>공유</button>
     <button class="tb" id="bCsv" title="결과 표를 엑셀(CSV)로"><i>📊</i>CSV 저장</button>
     <button class="tb" id="bClr" title="결과 모두 지우기"><i>🗑</i>결과 지우기</button>
     <button class="tb" id="bHelp" title="사용법"><i>❔</i>사용법</button>
@@ -146,6 +147,14 @@
   <div class="status"><span id="sSr">샘플링: —</span><span id="sRes">분해능: —</span><span>녹음은 이 기기 안에만 저장 (인터넷으로 보내지 않음)</span><span>이 앱은 모터를 움직이지 않습니다 — 튜닝 운전은 장비 앞에서 직접</span></div>
 </div>
 
+<dialog id="shareDlg"><h4>📤 결과 보내기</h4><div class="db">
+  <div style="display:grid;gap:8px">
+    <label><input type="radio" name="shw" value="csv" checked> <b>결과 표만 (CSV)</b> <span class="note">— 가장 가벼움, 보통 이것으로</span></label>
+    <label><input type="radio" name="shw" value="vib"> 결과 표 + <b>진동 원본</b> (CSV 여러 개)</label>
+    <label><input type="radio" name="shw" value="all"> 결과 표 + 진동 원본 + <b>녹음 전부 (WAV)</b> <span class="note" id="shSize"></span></label>
+  </div>
+  <div class="note" id="shHow" style="margin-top:10px"></div>
+</div><div class="bt"><button id="shNo">취소</button><button id="shGo" style="font-weight:700">📤 보내기</button></div></dialog>
 <dialog id="helpDlg"><h4>❔ Servo Ear 사용법</h4><div class="db">
   <ol style="margin:0;padding-left:20px">
     <li>휴대폰을 <b>기계의 고정된 부분(베드·프레임) 위에 테이프·자석 거치대로 단단히</b> 붙입니다. 소리는 모터·커플링·볼스크루 가까울수록 좋습니다.<br><span style="color:#b33">⚠ 움직이는 테이블·슬라이더 위에는 두지 마세요 (떨어지거나 끼일 수 있음).</span></li>
@@ -492,13 +501,47 @@ function showSpec(t) {                                    // 저장된 측정 �
   if (!an) { binHz = old.binHz || t.binHz; bins = old.bins || t.spec.length; }
   else { binHz = old.binHz; bins = old.bins; }
 }
-$("bCsv").onclick = async () => {
-  const list = (await allT()).sort((a, b) => a.at - b.at); if (!list.length) { toast("저장할 결과가 없습니다"); return; }
+function makeCsv(list) {
   const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`, head = ["#", "시각", "녹음 이름", ...P.map(p => `${p.no} ${p.ab}`), "길이(초)", "전체 dB", "배경 대비 dB", "피크 Hz", "피크 배경 대비 dB", "봉우리 2", "봉우리 3", "판정", "진동 RMS m/s²", "진동 배경 대비(배)", "진동 Hz", "진동 판정", "메모"];
   const rows = list.map((t, k) => [k + 1, new Date(t.at).toLocaleString("ko-KR"), t.name, ...P.map(p => t.params?.[p.no] ?? ""), t.sec, t.lv, t.ex, t.pk?.f ?? "", t.pk?.ex ?? "", t.top?.[1] ? `${t.top[1].f}Hz ${sgn(t.top[1].ex)}` : "", t.top?.[2] ? `${t.top[2].f}Hz ${sgn(t.top[2].ex)}` : "", t.j[1], t.vib?.rms ?? "", t.vib?.ratio ?? "", t.vib?.f ?? "", t.vib?.j[1] ?? "", t.memo || ""]);
-  const csv = "﻿" + [head, ...rows].map(r => r.map(q).join(",")).join("\r\n"), d = new Date(), a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = `ServoEar_결과_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  return new Blob(["\ufeff" + [head, ...rows].map(r => r.map(q).join(",")).join("\r\n")], { type: "text/csv" });
+}
+const stamp = () => { const d = new Date(); return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`; };
+const safe = n => n.replace(/[^\w=.\-가-힣]+/g, "_");
+$("bCsv").onclick = async () => {
+  const list = (await allT()).sort((a, b) => a.at - b.at); if (!list.length) { toast("저장할 결과가 없습니다"); return; }
+  const d = new Date(), a = document.createElement("a");
+  a.href = URL.createObjectURL(makeCsv(list)); a.download = `ServoEar_결과_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.csv`; document.body.appendChild(a); a.click(); a.remove();
   toast(`📊 ${list.length}건을 CSV로 저장했습니다 (다운로드 폴더)`);
+};
+// ================= 📤 공유 (휴대폰 공유 창: 아이폰 AirDrop·카톡·OneDrive·메일 / 갤럭시 Quick Share·블루투스·카톡) =================
+const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1), ANDROID = /Android/i.test(navigator.userAgent);
+$("bShare").onclick = async () => {
+  const list = await allT(); if (!list.length) { toast("보낼 결과가 없습니다"); return; }
+  const mb = list.reduce((t, x) => t + (x.wav?.size || 0), 0) / 1048576;
+  $("shSize").textContent = `— 녹음 ${list.length}개 · 약 ${mb.toFixed(1)}MB`;
+  $("shHow").innerHTML = IOS ? "📱 <b>아이폰</b>: 다음 창에서 <b>카카오톡</b>(나와의 채팅) · <b>OneDrive</b>(PC OneDrive 폴더에 자동으로 생김) · <b>메일</b> · <b>파일에 저장</b>을 고르세요. (Windows PC로는 블루투스 전송이 안 됩니다)"
+    : ANDROID ? "📱 <b>갤럭시·안드로이드</b>: 다음 창에서 <b>Quick Share</b>(PC에 Quick Share 앱) · <b>블루투스</b>(PC에서 '블루투스 파일 받기'를 먼저 켜기) · <b>카카오톡</b> · <b>OneDrive</b>를 고르세요."
+    : "💻 PC에서는 공유 창 대신 파일로 저장됩니다 (다운로드 폴더).";
+  $("shareDlg").showModal();
+};
+$("shNo").onclick = () => $("shareDlg").close();
+$("shGo").onclick = async () => {
+  const what = document.querySelector("input[name=shw]:checked").value, list = (await allT()).sort((a, b) => a.at - b.at), st = stamp();
+  const files = [new File([makeCsv(list)], `ServoEar_결과_${st}.csv`, { type: "text/csv" })];
+  list.forEach((t, k) => {
+    const hhmmss = (d => `${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`)(new Date(t.at)), base = `${String(k + 1).padStart(2, "0")}_${safe(t.name)}_${hhmmss}`;
+    if ((what === "vib" || what === "all") && t.vib?.raw) files.push(new File(["\ufeffms,x,y,z\r\n" + t.vib.raw.map(r => r.join(",")).join("\r\n")], `ServoEar_진동_${base}.csv`, { type: "text/csv" }));
+    if (what === "all" && t.wav) files.push(new File([t.wav], `ServoEar_${base}.wav`, { type: "audio/wav" }));
+  });
+  $("shareDlg").close();
+  const memo = $("memo").value ? ` (${$("memo").value})` : "";
+  try {
+    if (navigator.canShare && navigator.canShare({ files })) { await navigator.share({ files, title: `Servo Ear 결과 ${st}`, text: `Servo Ear 측정 ${list.length}건${memo}` }); toast(`📤 ${files.length}개 파일을 보냈습니다`); return; }
+  } catch (e) { if (e.name === "AbortError") { toast("보내기를 취소했습니다"); return; } }
+  // 공유 창이 없으면(PC 등) 파일로 하나씩 저장
+  for (const f of files) { const a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); a.remove(); await new Promise(r => setTimeout(r, 250)); }
+  toast(`📁 공유 창을 쓸 수 없어 ${files.length}개 파일을 다운로드 폴더에 저장했습니다`, 4000);
 };
 $("bClr").onclick = async () => { const l = await allT(); if (!l.length) return; if (!confirm(`측정 결과 ${l.length}건을 모두 지울까요?`)) return; for (const t of l) await delT(t.id); renderRes(); };
 $("bHelp").onclick = () => $("helpDlg").showModal(); $("helpOk").onclick = () => $("helpDlg").close();
