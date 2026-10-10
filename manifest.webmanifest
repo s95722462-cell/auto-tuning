@@ -1,0 +1,14 @@
+{
+  "name": "Servo Ear — 서보 소리 분석기",
+  "short_name": "Servo Ear",
+  "description": "서보 튜닝 중 공진음·헌팅음을 게인 값별로 기록·비교",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f0f0f0",
+  "theme_color": "#2b4f81",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
